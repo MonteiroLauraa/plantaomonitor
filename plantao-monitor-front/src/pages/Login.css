@@ -6,8 +6,8 @@
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    width: 100vw; 
-    position: fixed; 
+    width: 100vw;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
@@ -24,7 +24,7 @@
 }
 
 .login-logo {
-    max-width: 250px; 
+    max-width: 250px;
     margin-bottom: 1.5rem;
 }
 
@@ -55,12 +55,12 @@
 }
 
 .btn-login {
-    background-color: #0f6cbf; 
+    background-color: #0f6cbf;
     color: white;
 }
 
 .btn-login:hover {
-    background-color: #0d5a9e; 
+    background-color: #0d5a9e;
 }
 
 .footer-text {
@@ -94,9 +94,9 @@
 }
 
 .btn-guest {
-    background-color: #e9ecef; 
+    background-color: #e9ecef;
     color: #495057;
-    width: auto; 
+    width: auto;
     padding: 10px 20px;
 }
 
@@ -106,7 +106,7 @@
 
 .card-footer {
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
     font-size: 0.9rem;
     margin-top: 20px;

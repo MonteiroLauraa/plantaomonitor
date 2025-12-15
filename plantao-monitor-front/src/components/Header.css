@@ -17,7 +17,6 @@
 
 .menu-toggle-btn {
     display: none;
-    /* Desktop default: hidden */
     background: none;
     border: none;
     color: white;
@@ -33,7 +32,6 @@
 
     .app-header {
         padding: 0 15px;
-        /* Menos padding no mobile */
     }
 }
 
@@ -85,8 +83,6 @@
     border-left: 4px solid #dc3545;
 }
 
-
-/* User Dropdown Styles */
 .user-dropdown {
     position: absolute;
     top: 50px;
@@ -126,10 +122,9 @@
     background-color: rgba(220, 53, 69, 0.1);
 }
 
-/* Responsive Header Tweaks */
 @media (max-width: 480px) {
     .user-name-display {
         display: none;
-        /* Esconde nome no mobile, deixa só icone */
+
     }
 }

@@ -79,10 +79,10 @@ const DashboardOperador = () => {
                                                 className="btn-success"
                                                 style={{ backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
                                             >
-                                                ✅ Confirmar Presença
+                                                Confirmar Presença
                                             </button>
                                         )}
-                                        {p.status_confirmacao === 'ACK_OK' && <span style={{ color: '#28a745', fontWeight: 'bold' }}>Confirmado 🔒</span>}
+                                        {p.status_confirmacao === 'ACK_OK' && <span style={{ color: '#28a745', fontWeight: 'bold' }}>Confirmado</span>}
                                     </div>
                                 </li>
                             ))}

@@ -21,8 +21,6 @@ const Preferencias = () => {
 
     const carregarPreferencias = async () => {
         try {
-            // CORREÇÃO: Usar o ID da sessão atual para garantir consistência com o Header/Sidebar
-            // Evita usar auth.currentUser que pode estar "preso" em um login anterior se o logout não foi limpo
             const sessaoId = sessionStorage.getItem('user_id');
 
             if (!sessaoId) {
@@ -31,8 +29,6 @@ const Preferencias = () => {
             }
 
             setUserId(sessaoId);
-
-            // Busca os dados diretamente pelo ID
             const res = await api.get(`/usuarios/${sessaoId}`);
 
             if (res.data) {
@@ -64,8 +60,6 @@ const Preferencias = () => {
                 alert("Erro: Usuário não identificado. Faça login novamente.");
                 return;
             }
-
-            // Usa a rota específica de preferências
             await api.put(`/usuarios/${userId}/preferencias`, formData);
             alert("Preferências salvas com sucesso!");
         } catch (e) {

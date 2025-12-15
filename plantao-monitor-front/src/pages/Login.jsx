@@ -21,28 +21,20 @@ const Login = () => {
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-
-      // 1. Busca os dados reais no SEU banco de dados (PostgreSQL)
       const response = await api.get(`/check-user?uid=${firebaseUser.uid}`);
-      const dadosUsuario = response.data; // Aqui vem { id, nome, role, email, ... }
+      const dadosUsuario = response.data;
 
-      console.log("Dados Login Real:", dadosUsuario);
-
-      // 2. Salva TUDO no navegador (Sessão Única por Aba)
       sessionStorage.setItem('token', await firebaseUser.getIdToken());
       sessionStorage.setItem('user_uid', firebaseUser.uid);
-      sessionStorage.setItem('user_id', dadosUsuario.id);      // ID numérico para o banco
-      sessionStorage.setItem('user_name', dadosUsuario.nome);  // Nome real para o Header
-      sessionStorage.setItem('user_role', dadosUsuario.role);  // Role para proteção
-      sessionStorage.setItem('user_email', dadosUsuario.email); // Email para displays
+      sessionStorage.setItem('user_id', dadosUsuario.id);
+      sessionStorage.setItem('user_name', dadosUsuario.nome);
+      sessionStorage.setItem('user_role', dadosUsuario.role);
+      sessionStorage.setItem('user_email', dadosUsuario.email);
 
-      // 3. Redireciona baseado na Role (Dispara evento para atualizar Header)
       window.dispatchEvent(new Event('session-update'));
 
-      // Ativar notificações
       iniciarNotificacoes(firebaseUser.uid);
 
-      // 3. Redireciona baseado na Role
       if (dadosUsuario.role === 'admin') {
         navigate('/admin');
       } else if (dadosUsuario.role === 'viewer' || dadosUsuario.role === 'visitante') {

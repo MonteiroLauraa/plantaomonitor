@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    console.log('so pra testar se o firebase pegou  ', payload);
 
     const notificationTitle = payload.notification.title;
     const notificationOptions = {

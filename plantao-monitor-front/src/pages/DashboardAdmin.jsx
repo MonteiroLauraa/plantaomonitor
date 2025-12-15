@@ -42,7 +42,6 @@ const DashboardAdmin = () => {
         <div className="dashboard-container">
             <h1>Olá, Querolino !</h1>
 
-            {/* CARDS DE RESUMO */}
             <div className="metrics-grid">
 
                 <div className="metrica-card">
@@ -86,12 +85,11 @@ const DashboardAdmin = () => {
 
             </div>
 
-            {/* GRÁFICOS */}
+
             <div className="chart-grid">
 
-                {/* GRÁFICO DE BARRAS: MTTR POR REGRA */}
                 <div className="chart-card">
-                    <h3>⏱️ MTTR - Tempo Médio de Resolução (min)</h3>
+                    <h3>Tempo Médio de Resolução (min)</h3>
                     <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={kpis}>
@@ -111,9 +109,8 @@ const DashboardAdmin = () => {
                     </div>
                 </div>
 
-                {/* GRÁFICO DE BARRAS: ERROS DE EXECUÇÃO */}
                 <div className="chart-card">
-                    <h3>❌ Falhas de Execução (Query Errors)</h3>
+                    <h3> Falhas de Execução (Query Errors)</h3>
                     <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={kpis} layout="vertical">
@@ -132,10 +129,6 @@ const DashboardAdmin = () => {
                     </div>
                 </div>
 
-            </div>
-
-            <div className="dashboard-footer">
-                <p>Dados atualizados em tempo real via Analytics Engine (Pandas/Python)</p>
             </div>
         </div>
     );

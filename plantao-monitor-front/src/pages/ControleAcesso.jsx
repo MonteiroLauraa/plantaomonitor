@@ -77,7 +77,7 @@ const ControleAcesso = () => {
                                 <td>
                                     <strong>{perm.codigo}</strong>
                                     <br />
-                                    {/* <small>{perm.descricao}</small> */}
+
                                 </td>
                                 {roles.map(role => {
                                     const ativo = isAtivo(role, perm.id);

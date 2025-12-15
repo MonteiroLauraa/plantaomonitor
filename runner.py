@@ -14,13 +14,12 @@ from email.mime.multipart import MIMEMultipart
 import json
 import requests
 
-# --- CONFIGURAÇÃO ---
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 DB_URL = os.getenv("DATABASE_URL")
 
-# Firebase Init
+
 if not firebase_admin._apps:
     try:
         cred_dict = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY"))
@@ -39,11 +38,6 @@ def get_destinatarios_tokens(role_target):
     
     conn = get_db_connection()
     cur = conn.cursor()
-    
-    # Busca tokens de usuarios que:
-    # 1. Possuem a role necessaria (tabela usuario_roles)
-    # 2. Estao com push habilitado (enable_push = true)
-    # 3. Estao dentro do horario (start_time <= now <= end_time)
     
     query = """
         SELECT DISTINCT d.push_token 
@@ -80,39 +74,28 @@ def send_push_notification(tokens, title, body, data_payload=None):
 
 def create_incident(cur, regra, linhas_afetadas):
     logging.warning(f"Regra '{regra['nome']}' acionada! Linhas: {linhas_afetadas}")
-    
-    # Step 2: State Management (Upsert)
     cur.execute("SELECT id_incidente FROM incidentes WHERE id_regra = %s AND status IN ('OPEN', 'ACK')", (regra['id'],))
     existing = cur.fetchone()
     
     if existing:
-        # Cenário B (Recorrência) - Apenas Update timestamp
+     
         logging.info(f"Recorrência: Incidente {existing['id_incidente']} atualizado.")
         cur.execute("UPDATE incidentes SET data_ultima_ocorrencia = NOW(), detalhes = %s WHERE id_incidente = %s", 
                     (f"Recorrência em {datetime.datetime.now()}: {linhas_afetadas} itens.", existing['id_incidente']))
-        return  # NÃO NOTIFICA NOVAMENTE
-
-    # Cenário A (Novo Incidente)
+        return  
     cur.execute("""
         INSERT INTO incidentes (id_regra, status, prioridade, detalhes, data_ultima_ocorrencia)
         VALUES (%s, 'OPEN', %s, %s, NOW()) RETURNING id_incidente
     """, (regra['id'], regra['prioridade'], f"Regra {regra['nome']} detectou {linhas_afetadas} registros."))
     
     incidente_id = cur.fetchone()['id_incidente']
-    
-    # Notificação DB (Initial Record)
-    # 1. Definição de Destinatários
-    
-    # A. Target Específico (Plantonista / Operador)
     canal_para_busca = regra.get('role_target') or regra.get('roles')
     plantonista = buscar_destinatario_ativo(cur, canal_para_busca)
-    
-    # 1. NOTIFICAÇÃO DO OPERADOR (Responsabilidade)
+
     if plantonista:
         email_operador = plantonista['email']
         nome_operador = plantonista['nome']
-        
-        # Preferencias do Operador
+     
         quer_email = plantonista.get('recebe_email', True)
         quer_push = plantonista.get('recebe_push', True)
 
@@ -131,7 +114,7 @@ def create_incident(cur, regra, linhas_afetadas):
         if quer_push:
             try:
                 requests.post("http://localhost:8000/notify/push", json={
-                    "titulo": f"🚨 AÇÃO NECESSÁRIA #{incidente_id}",
+                    "titulo": f" AÇÃO NECESSÁRIA #{incidente_id}",
                     "mensagem": f"Você está de plantão! Falha em: {regra.get('nome')}",
                     "email_alvo": email_operador 
                 }, timeout=1)
@@ -142,39 +125,30 @@ def create_incident(cur, regra, linhas_afetadas):
             print(f"   Usuário {nome_operador} desativou Push. Ignorando envio.")
     else:
         print(f"   Sem plantonista ativo para {canal_para_busca}")
-
-    # 2. NOTIFICAÇÃO DOS ADMINS (Ciência/Monitoramento - Broadcast)
-    # Dispara um Push Broadcast para role 'admin' via API especializada
     try:
         print("   [Push] Disparando Broadcast para Admins...")
         requests.post("http://localhost:8000/notify/push", json={
-            "titulo": f"⚠️ Novo Incidente #{incidente_id}",
+            "titulo": f"Novo Incidente #{incidente_id}",
             "mensagem": f"Regra: {regra.get('nome')} | Operador: {plantonista['nome'] if plantonista else 'Ninguém'}",
             "target_role": "admin"
         }, timeout=1)
     except Exception as e:
         print(f"   Erro ao notificar Admins: {e}")
-
-    # 3. EMAIL EXTRA CONFIGURADO NA REGRA (Destinatário Fixo)
     email_extra = regra.get('email_notificacao')
     if email_extra and '@' in email_extra:
         print(f"   [Extra] Regra tem destinatário fixo: {email_extra}")
-        
-        # Enviar email via SMTP
         enviar_email_smtp(
             email_extra, 
             f"Alerta Específico: {regra.get('nome')}",
             f"A regra '{regra.get('nome')}' falhou e você está configurado como receptor fixo.\nIncidente #{incidente_id}"
         )
         
-        # Registra no histórico de notificações (id_usuario NULL = externo)
         cur.execute("""
             INSERT INTO notificacoes (id_usuario, id_incidente, canal, destinatario, titulo, mensagem, status)
             VALUES (NULL, %s, 'EMAIL', %s, 'Alerta Fixo', 'Envio configurado na regra', 'enviado')
         """, (incidente_id, email_extra))
 
 
-# --- ON-CALL & ESCALATION ---
 
 def buscar_destinatario_ativo(cursor, canal_regra):
     """
@@ -184,8 +158,6 @@ def buscar_destinatario_ativo(cursor, canal_regra):
     """
     canal_alvo = canal_regra if canal_regra else 'GERAL'
     print(f"   [Router] Procurando plantonista para '{canal_alvo}'...")
-
-    # Buscamos: Email, Nome E as Preferências (COALESCE garante que NULL = TRUE)
     query = """
         SELECT u.id, u.email, u.nome, 
                COALESCE(u.recebe_email, true) as recebe_email,
@@ -210,7 +182,6 @@ def buscar_destinatario_ativo(cursor, canal_regra):
         print(f"   Plantonista: {plantonista['nome']} | Email={plantonista['recebe_email']}, Push={plantonista['recebe_push']}")
         return plantonista
     
-    # 2. FALLBACK: Se não tiver ninguém de plantão, manda para o ADMIN GERAL
     print(f"   Ninguém de plantão para '{canal_alvo}'. Procurando Admin (Fallback).")
     
     cursor.execute("""
@@ -225,7 +196,6 @@ def buscar_destinatario_ativo(cursor, canal_regra):
          print(f"   Fallback Admin: {admin_fallback['nome']}")
          return admin_fallback
     
-    # Se não tiver admin nenhum (muito raro), usa o email do sistema
     return {'id': None, 'email': os.getenv("EMAIL_USER"), 'recebe_email': True, 'recebe_push': True, 'nome': 'Admin System'}
 
 def atualizar_heartbeat(conn):
@@ -244,8 +214,6 @@ def job_escalonamento():
     try:
         cursor = conn.cursor()
         
-        # 1. Buscar incidentes OPEN há mais de 2 horas (Escalation)
-        # Intervalo configurado: 2 hours
         query = """
             SELECT i.id_incidente, r.nome as nome_regra
             FROM incidentes i
@@ -260,11 +228,8 @@ def job_escalonamento():
         for inc in atrasados:
             print(f"   ESCALANDO Incidente #{inc['id_incidente']} (Sem ACK há 2h)")
             
-            # A. Aumenta a prioridade para 1 (Crítico)
             cursor.execute("UPDATE incidentes SET prioridade = 1 WHERE id_incidente = %s", (inc['id_incidente'],))
             
-            # B. Notifica o ADMIN (Chefe) porque o plantonista falhou
-            # B. Notifica o ADMIN (Chefe) porque o plantonista falhou
             cursor.execute("""
                 INSERT INTO notificacoes (id_incidente, canal, destinatario, mensagem, status, titulo, metadados)
                 VALUES (%s, 'EMAIL', 'admin@empresa.com', 'ESCALATION: Operador não respondeu em 2h!', 'PENDING', '🔥 ESCALATION ALERT', %s)
@@ -277,35 +242,26 @@ def job_escalonamento():
     finally:
         conn.close()
 
-# --- NOTIFICATION LOGIC (UPDATED) ---
-
 def processar_notificacoes(conn):
     try:
         cursor = conn.cursor()
-        # Busca notificações pendentes (suporta Status novo e antigo)
         cursor.execute("SELECT * FROM notificacoes WHERE status ILIKE 'pending' OR status = 'pendente'")
         notificacoes = cursor.fetchall()
 
         for notif in notificacoes:
-            # Lógica de Roteamento (Se o destinatário for genérico, tenta achar o plantonista)
             destinatario = notif['destinatario']
-            
-            # Lógica de Assunto/Titulo
             id_inc = notif['id_incidente']
             
-            # Use 'titulo' from DB if exists, else fallback
             titulo_db = notif.get('titulo')
             assunto = titulo_db if titulo_db else (f"Plantão Monitor: Incidente #{id_inc}" if id_inc else "Plantão Monitor: Novo Aviso")
             titulo_push = titulo_db if titulo_db else (f"Incidente #{id_inc}" if id_inc else "Novo Aviso")
 
-            # Envio de E-mail
             if notif['canal'] == 'EMAIL':
                 print(f"   Enviando e-mail para {destinatario}...")
                 enviar_email_smtp(destinatario, assunto, notif['mensagem'])
             
-            # Envio de Push (Via API Node)
             try:
-                # Aqui o Python pede para o Node disparar o Push
+          
                 payload = {
                     "titulo": titulo_push,
                     "mensagem": notif['mensagem'],
@@ -316,7 +272,6 @@ def processar_notificacoes(conn):
             except:
                 pass
 
-            # Marca como enviado
             cursor.execute("UPDATE notificacoes SET status = 'enviado' WHERE id = %s", (notif['id'],))
         
         conn.commit()
@@ -355,10 +310,6 @@ def get_emails_for_notification(regra):
     return emails
 
 def enviar_email_smtp(destinatarios, regra_nome, erro_detalhe):
-    # Adapter for User provided call which passes 3 args, missing incident_id sometimes, or different order.
-    # User call: enviar_email_smtp(destinatario, f"Alerta #{notif['id_incidente']}", notif['mensagem'])
-    # My signature: (destinatarios, regra_nome, erro_detalhe, incidente_id)
-    # I will conform to the USER'S usage in the new code: (destinatario, subject, body).
     
     smtp_server = os.getenv("EMAIL_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("EMAIL_PORT", 587))
@@ -372,7 +323,7 @@ def enviar_email_smtp(destinatarios, regra_nome, erro_detalhe):
     if isinstance(destinatarios, str):
         destinatarios = [destinatarios]
 
-    assunto = regra_nome # Reusing arg name as subject
+    assunto = regra_nome 
     corpo_html = f"""
     <html><body>
         <h2 style="color: #d9534f;">{regra_nome}</h2>
@@ -397,32 +348,29 @@ def enviar_email_smtp(destinatarios, regra_nome, erro_detalhe):
     except Exception as e:
         logging.error(f"Erro Email: {e}")
 
-# --- JOB PRINCIPAL ---
 def check_rules():
     logging.info("--- Ciclo de Monitoramento ---")
     try:
         conn = get_db_connection()
         if not conn: return
         
-        atualizar_heartbeat(conn) # <--- SINAL DE VIDA
+        atualizar_heartbeat(conn) 
         
         cur = conn.cursor()
         cur.execute("SELECT * FROM regras WHERE active = true")
         regras = cur.fetchall()
         
         for r in regras:
-            # VERIFICAÇÃO DE SILÊNCIO
             silenciado_ate = r.get('silenciado_ate')
             if silenciado_ate:
                 agora = datetime.datetime.now()
-                # Ensure compatibility (naive vs aware)
+               
                 if hasattr(silenciado_ate, 'replace'):
                     silenciado_ate = silenciado_ate.replace(tzinfo=None)
-                
-                # logging.info(f"DEBUG: Regra {r['nome']} | Silenciado até: {silenciado_ate} | Agora: {agora}")
+
                 
                 if silenciado_ate > agora:
-                    logging.info(f"   🤫 Regra '{r['nome']}' silenciada até {silenciado_ate}. Pulando.")
+                    logging.info(f" Regra '{r['nome']}' silenciada até {silenciado_ate}. Pulando.")
                     continue
 
             try:
@@ -445,19 +393,17 @@ def check_rules():
                 except Exception as execution_err:
                     sucesso = False
                     erro_msg = str(execution_err)
-                    raise execution_err # Re-raise to be caught by outer except to rollback/log
+                    raise execution_err
                 finally:
                     end_time = datetime.datetime.now()
                     
-                    # SE HOUVE ERRO, PRECISAMOS FAZER ROLLBACK PARA LIMPAR A TRANSAÇÃO
-                    # ANTES DE TENTAR INSERIR O LOG, SENÃO O INSERT FALHA COM "TRANSACTION ABORTED"
+                    if not sucesso:
                     if not sucesso:
                          try:
                              conn.rollback()
                          except:
                              pass
 
-                    # REGISTRA A EXECUÇÃO PARA O DASHBOARD (CRÍTICO)
                     try:
                         cur.execute("""
                             INSERT INTO execucoes_regras (id_regra, data_inicio, data_fim, sucesso, valor_retornado, erro)
@@ -477,23 +423,20 @@ def check_rules():
 
 
 def job_notificacoes():
-    logging.info("--- Processando Notificações Fila ---")
+    logging.info("Processando Notificações Fila")
     conn = get_db_connection()
     if conn:
         processar_notificacoes(conn)
         conn.close()
 
 def job_verificar_acks_escalas():
-    # HANDOVER PROTOCOL / VERIFICAÇÃO DE ACK EM ESCALAS
-    # Se o plantonista não confirmar, passamos para o próximo.
-    logging.info("[Escalas] Verificando confirmações de presença...")
+    logging.info("Verificando confirmações de presença...")
     conn = get_db_connection()
     if not conn: return
 
     try:
-        cursor = conn.cursor(cursor_factory=RealDictCursor) # Ensure dict access
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        # 1. BUSCAR PLANTÕES CRÍTICOS (Começam em menos de 2h e ainda estão PENDING)
         query_criticos = """
             SELECT e.id, e.id_usuario, e.data_inicio, e.canal, u.nome, u.email
             FROM escalas e
@@ -507,7 +450,6 @@ def job_verificar_acks_escalas():
         for escala in escalas_sem_ack:
             logging.warning(f"   ALERTA: {escala['nome']} não confirmou plantão de {escala['data_inicio']}!")
 
-            # 2. DESCOBRIR O PRÓXIMO DA LISTA (Quem vem depois?)
             query_proximo = """
                 SELECT id_usuario, data_inicio 
                 FROM escalas 
@@ -525,14 +467,12 @@ def job_verificar_acks_escalas():
                 novo_id_usuario = proximo['id_usuario']
                 logging.info(f"   Redirecionando para o próximo da fila: ID {novo_id_usuario}")
             else:
-                # Se não tiver próximo, joga para o Admin (Fallback)
                 logging.warning("   Ninguém na fila. Escalando Admin.")
                 cursor.execute("SELECT id, email, nome FROM usuarios WHERE role='admin' LIMIT 1")
                 admin = cursor.fetchone()
                 if admin: novo_id_usuario = admin['id']
 
             if novo_id_usuario:
-                # 3. REALIZAR A TROCA (Update na escala)
                 update_query = """
                     UPDATE escalas 
                     SET id_usuario = %s, 
@@ -542,14 +482,13 @@ def job_verificar_acks_escalas():
                 """
                 cursor.execute(update_query, (novo_id_usuario, escala['id_usuario'], escala['id']))
 
-                # 4. NOTIFICAR O NOVO PLANTONISTA (João)
                 cursor.execute("SELECT email, nome FROM usuarios WHERE id = %s", (novo_id_usuario,))
                 dados_novo = cursor.fetchone()
                 
                 if dados_novo:
                     msg_novo = f"URGENTE: Você assumiu o plantão de {escala['data_inicio']} pois {escala['nome']} não confirmou."
                     
-                    # Push (Request to Node API)
+     
                     try:
                         requests.post("http://localhost:8000/notify/push", json={
                             "titulo": "PLANTÃO REAGENDADO PARA VOCÊ",
@@ -557,14 +496,12 @@ def job_verificar_acks_escalas():
                             "email_alvo": dados_novo['email']
                         }, timeout=2)
                     except: pass
-                    
-                    # Email notification db record
+         
                     cursor.execute("""
                         INSERT INTO notificacoes (id_usuario, destinatario, canal, mensagem, status, titulo)
                         VALUES (%s, %s, 'EMAIL', %s, 'PENDING', 'Plantão Transferido')
                     """, (novo_id_usuario, dados_novo['email'], msg_novo))
 
-                # 5. NOTIFICAR O ANTIGO (Que perdeu o plantão)
                 msg_antigo = f"Você perdeu o plantão de {escala['data_inicio']} por falta de ACK."
                 cursor.execute("""
                     INSERT INTO notificacoes (id_usuario, destinatario, canal, mensagem, status, titulo, id_incidente)
@@ -578,10 +515,9 @@ def job_verificar_acks_escalas():
     finally:
         conn.close()
 
-# --- AGENDAMENTO ---
 schedule.every(30).seconds.do(check_rules)
-schedule.every(5).minutes.do(job_verificar_acks_escalas) # Handover Protocol
-schedule.every(15).seconds.do(job_notificacoes) # Envio de Emails
+schedule.every(5).minutes.do(job_verificar_acks_escalas) 
+schedule.every(15).seconds.do(job_notificacoes)
 schedule.every(5).minutes.do(job_escalonamento)
 
 if __name__ == "__main__":

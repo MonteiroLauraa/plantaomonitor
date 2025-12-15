@@ -13,16 +13,11 @@ const EsqueciSenha = () => {
         try {
             const payload = type === 'username' ? { username } : { email };
 
-            // Chama API que vai:
-            // 1. Achar o user
-            // 2. Gerar link Firebase
-            // 3. Enviar email via runner
             await api.post('/auth/reset-password', payload);
 
             alert("Se os dados estiverem corretos, você receberá um email com instruções em breve.");
         } catch (error) {
             console.error(error);
-            // Por segurança, não confirmamos erro de "usuário não existe"
             alert("Se os dados estiverem corretos, você receberá um email com instruções em breve.");
         } finally {
             setLoading(false);

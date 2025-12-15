@@ -143,7 +143,7 @@ const Perfil = () => {
                 </div>
 
                 <div className="form-group full-width" style={{ borderTop: '1px solid #30363d', paddingTop: '20px', marginTop: '10px' }}>
-                    <label style={{ color: '#ff7b72' }}>Trocar Senha (Opcional):</label>
+                    <label style={{ color: '#ff7b72' }}>Trocar Senha :</label>
                     <input
                         type="password"
                         name="nova_senha"

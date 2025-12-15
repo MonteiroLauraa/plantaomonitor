@@ -16,19 +16,14 @@ const PaginaVisitante = () => {
                 const response = await api.get(`/check-user?uid=${uid}`);
                 const user = response.data;
 
-                // Se o papel mudou para algo aprovado
                 if (user.role && user.role !== 'viewer' && user.role !== 'visitante') {
                     console.log("Papel atualizado! Redirecionando...", user.role);
 
-                    // Atualiza Sessão
                     sessionStorage.setItem('user_role', user.role);
                     sessionStorage.setItem('user_name', user.nome);
                     sessionStorage.setItem('user_id', user.id);
 
-                    // Notifica mudança global (se houver listeners)
                     window.dispatchEvent(new Event('session-update'));
-
-                    // Redireciona
                     if (user.role === 'admin') navigate('/admin');
                     else navigate('/operador');
                 }
@@ -36,11 +31,7 @@ const PaginaVisitante = () => {
                 console.error("Erro ao verificar status:", error);
             }
         };
-
-        // Verifica imediatamente ao carregar
         checkStatus();
-
-        // Verifica a cada 5 segundos (Polling)
         const interval = setInterval(checkStatus, 5000);
 
         return () => clearInterval(interval);

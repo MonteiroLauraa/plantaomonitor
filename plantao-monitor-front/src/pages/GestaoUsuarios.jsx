@@ -277,7 +277,7 @@ const GestaoUsuarios = () => {
 
               <div style={{ textAlign: 'right', marginTop: '10px' }}>
                 <button onClick={() => setModalOpen(false)} className="btn-modern btn-primary" style={{ width: '100%' }}>
-                  Salvar Alterações
+                  Salvar
                 </button>
               </div>
             </div>

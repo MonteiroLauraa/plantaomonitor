@@ -104,7 +104,7 @@ input:checked+.slider:before {
     background-color: #ffffff;
 }
 
-/* Disabled state */
+
 input:disabled+.slider {
     background-color: #161b22;
     cursor: not-allowed;

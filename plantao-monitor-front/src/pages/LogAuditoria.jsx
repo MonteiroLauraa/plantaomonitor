@@ -41,7 +41,6 @@ const LogAuditoria = () => {
         Histórico completo de ações realizadas no sistema (Admin, Operadores e Robôs).
       </p>
 
-      {/* FILTROS */}
       <form onSubmit={handleFiltrar} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <input
           type="text"
@@ -71,7 +70,7 @@ const LogAuditoria = () => {
           style={{ flex: 1, minWidth: '200px' }}
         />
         <button type="submit" className="btn-save" style={{ padding: '10px 20px', height: '42px' }}>
-          🔍 Filtrar
+          Filtrar
         </button>
       </form>
 
@@ -105,7 +104,7 @@ const LogAuditoria = () => {
             </tr>
           ))}
           {logs.length === 0 && (
-            <tr><td colSpan="6" style={{ textAlign: 'center' }}>Nenhum registro de auditoria encontrado.</td></tr>
+            <tr><td colSpan="6" style={{ textAlign: 'center' }}>Nenhum registro encontrado.</td></tr>
           )}
         </tbody>
       </table>
