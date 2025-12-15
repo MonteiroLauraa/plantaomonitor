@@ -1,0 +1,103 @@
+/* Configurações Globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5; /* Fundo cinza claro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Cartão principal */
+.recuperar {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem; /* 40px */
+    width: 100%;
+    max-width: 600px; /* Largura do cartão */
+}
+
+/* Parágrafo de instrução */
+.recuperar p {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+/* Títulos das seções */
+.recuperar h2 {
+    font-size: 1.4rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Espaçamento extra para o segundo título */
+.email-title {
+    margin-top: 2rem;
+}
+
+/* Formulário com Layout em Grid */
+.recovery-form {
+    display: grid;
+    /* Duas colunas: 
+       1ª (label) com 140px de largura
+       2ª (input/button) com o resto do espaço (1fr) 
+    */
+    grid-template-columns: 140px 1fr;
+    align-items: center; /* Alinha o label e o input verticalmente */
+    row-gap: 1rem;      /* Espaço entre as linhas (label/input e o botão) */
+    column-gap: 1rem;   /* Espaço entre o label e o input */
+}
+
+.recovery-form label {
+    grid-column: 1 / 2; /* Coloca o label na 1ª coluna */
+    font-weight: 600;
+    color: #555;
+    line-height: 1.4;
+}
+
+.recovery-form input {
+    grid-column: 2 / 3; /* Coloca o input na 2ª coluna */
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Botão "Buscar" */
+.btn {
+    grid-column: 2 / 3;    /* Coloca o botão na 2ª coluna */
+    justify-self: start; /* Alinha o botão à esquerda (início) da sua célula do grid */
+    
+    background-color: #007bff; /* Azul padrão */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 24px; /* Mais largo que alto */
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3; /* Azul mais escuro */
+}
+
+/* Linha divisória fina no final */
+.divider {
+    border: 0;
+    border-top: 1px solid #e9ecef; /* Cinza bem claro */
+    margin-top: 2rem;
+}

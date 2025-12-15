@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Plantão Monitor</title>
+
+    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="adm.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+        <nav>
+            <ul class="menu-list">
+                <li><a href="operador.html" class="menu-link">Inicio</a></li>
+                <li><a href="pagina_destino.html" class="menu-link">Incidentes</a></li>
+                <li><a href="escalas.html" class="menu-link">Escalas</a></li>
+                <li><a href="preferenciasoperador.html" class="menu-link">Notificações</a></li>
+                <li><a href="opedit.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="oplog.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+        
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+            <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+                <h2>Dashboard</h2>
+            </div>
+            <div class="topbar-user">
+                <span>operador@gmail.com</span>
+            </div>
+        </header>
+
+        <section class="page-content">
+            
+            <div class="card">
+                <h2>Bem-vindo, Operador!</h2>
+            </div>
+
+        </section>
+        
+    </main>
+
+    <div id="sidebar-overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Script 1: Menu Ativo ---
+            const currentPage = window.location.pathname.split('/').pop();
+            const menuLinks = document.querySelectorAll('.menu-list a');
+
+            menuLinks.forEach(link => {
+                const linkPage = link.getAttribute('href').split('/').pop();
+                
+                // Lógica especial para a página "Início"
+                const pageFile = (currentPage === 'operador.html' || currentPage === '') ? 'Inicio' : '';
+                
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                }
+                
+                if (pageFile === 'Inicio' && (link.innerText === 'Inicio')) {
+                     link.classList.add('active');
+                }
+            });
+
+            // --- Script 2: Menu Hambúrguer ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    
+</body>
+</html>

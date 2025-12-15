@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Regras - Plantão Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adm.css">
+
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+        
+        <img src="logo.png" alt="Logo da Empresa">
+
+    </div>
+        
+        <nav>
+            <ul class="menu-list">
+                 <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+                <h2>RF05,RF06, RF18,RF17</h2>
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+ </head>
+<body>
+    
+
+    <main>
+        <h1>Gerenciamento de Regras (Alertas) </h1>
+        
+        <button type="button">Criar Nova Regra</button>
+
+        <form class="form-regra">
+            <h2>Editor de Regra</h2>
+            
+            <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome"> 
+
+            <label for="descricao">Descrição:</label>
+            <textarea id="descricao" name="descricao"></textarea>
+
+            <label for="sql">Query SQL/PLSQL:</label>
+            <textarea id="sql" name="sql" rows="10" placeholder="SELECT ..."></textarea>
+
+            <label for="banco">Banco de Dados:</label>
+            <select id="banco" name="banco">
+                <option value="postgres">Postgres</option>
+                <option value="oracle">Oracle</option>
+            </select>
+
+            <label for="minuto_atualizacao">Minuto Atualização (Agendamento):</label>
+            <input type="number" id="minuto_atualizacao" name="minuto_atualizacao" min="1" max="60">
+
+            <label for="hora_inicio">Hora inicio:</label>
+            <input type="time" id="hora_inicio" name="hora_inicio">
+
+            <label for="hora_final">Hora Final:</label>
+            <input type="time" id="hora_final" name="hora_final">
+
+            <label for="qtd_erro_max">Qtd. Erro Max:</label>
+            <input type="number" id="qtd_erro_max" name="qtd_erro_max" min="1">
+
+            <label for="prioridade">Prioridade:</label>
+            <input type="text" id="prioridade" name="prioridade">
+
+            <label for="roles">Roles :</label>
+            <input type="text" id="roles" name="roles">
+
+            <button type="button">Testar Regra (Sandbox) </button>
+            <button type="submit">Salvar Regra</button>
+        </form>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- FUNCIONALIDADE: Menu Hambúrguer ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+            // Verifica se os elementos existem na página
+            if (hamburgerBtn && sidebar && overlay) {
+                
+                // Função para abrir/fechar o menu
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                // Abre/fecha ao clicar no botão hambúrguer
+                hamburgerBtn.addEventListener('click', toggleMenu);
+    
+                // Fecha o menu se clicar no overlay (fundo escuro)
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>

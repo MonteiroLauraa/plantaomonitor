@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Login</title>
+    <link rel="stylesheet" href="autenticacao.css">
+</head>
+<body>
+
+    <div class="login-card">
+        
+        <img src="logo.png" alt="Logo da Empresa" class="logo">
+
+        <form id="login-form" action="operador.html" method="get">
+            <div class="input-group">
+                <input type="email" id="email" name="email" placeholder="Usuario" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="senha" name="senha" placeholder="Senha" required>
+            </div>
+            
+            <button type="submit" class="btn btn-login">Acessar</button>
+        </form>
+
+        <p class="footer">Primeiro acesso? <a href="cadastro.html" class="primeiroacesso">Cadastre-se aqui</a></p>
+        <p><a href="recuperarsenha.html" class="forgot_password">Perdeu a senha?</a></p>
+
+        <hr class="divider">
+
+        <div class="visitante">
+            <h3>Alguns cursos podem permitir o acesso a visitantes</h3>
+            <a href="pagina_visitante.html" class="btn btn-guest">Acessar como visitante</a>
+        </div>
+
+        <hr class="divider">
+        
+        <footer class="card-footer">
+            <a href="#" class="lang-select">Português - Brasil (pt_br) &#9662;</a>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+                const email = document.getElementById('email').value;
+                const senha = document.getElementById('senha').value;
+                if (email === 'adm@gmail.com' && senha === '1111') {
+                    alert('login como administrador foi realizado com sucesso');
+                    window.location.href = 'pag_adm.html';
+                } else if (email === 'operador@gmail.com' && senha === '2222') {
+                    window.location.href = loginForm.action; 
+
+                } else {
+                    alert('Usuário ou senha inválidos.');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

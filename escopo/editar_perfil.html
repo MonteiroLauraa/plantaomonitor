@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - Plantão Monitor</title>
+    <link rel = "stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="adm.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+      <nav>
+            <ul class="menu-list">
+                 <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+                <h2>Dashboard</h2>
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+</head>
+<body>
+    <nav>
+        </nav>
+
+    <main>
+        
+        <h1>Meu Perfil</h1>
+        
+        <form>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" value="Nome do Usuário Logado">
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="usuario@.com" readonly>
+
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" placeholder="Digite nova senha">
+
+            <label for="telefone">Telefone:</label>
+            <input type="tel" id="telefone" name="telefone" value="(000) 00000-0000">
+            
+            <label for="endereco">Endereço:</label>
+            <input type="text" id="endereco" name="endereco" value="Rua Exemplo, 123, Cidade, Estado">
+            
+            <button type="submit">Salvar Alterações</button>
+        </form>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>

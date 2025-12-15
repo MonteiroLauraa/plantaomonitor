@@ -1,0 +1,225 @@
+
+:root {
+  
+    --cor-primaria: #0f7436;       
+    --cor-acento-amarelo: #ffc107; 
+    --cor-perigo-vermelho: #dc3545;
+
+   
+    --cor-sidebar-bg: #0a0f18;    
+    --cor-fundo-pagina: #0a0f18;  
+
+    --cor-sidebar-texto: #cbd5e1;
+    --cor-sidebar-hover: #1f2a44;
+
+    --cor-card-fundo: #1e1e1e;
+    --cor-branca: #FFFFFF;
+
+    --cor-borda: #333333;
+    --cor-texto-claro: #e0e0e0;
+    --cor-texto-escuro: #111;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Inter, system-ui, Segoe UI, Arial, sans-serif;
+}
+body {
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--cor-fundo-pagina);
+    color: var(--cor-texto-claro);
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--cor-sidebar-bg); /* Mantém o azul escuro */
+    color: var(--cor-branca);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-logo {
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.sidebar-logo img {
+    max-width: 100%;
+    height: auto;
+    max-height: 60px;
+}
+
+.sidebar .sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    background: transparent !important; 
+}
+/* --- Estilo do Footer da Sidebar (Botão Sair) --- */
+
+.sidebar-footer {
+    /* Adiciona uma linha no topo para separar do menu */
+    border-top: 1px solid var(--cor-borda); 
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+/* Reutiliza o estilo .menu-link, mas damos 
+  uma cor de "perigo" (vermelho) no hover.
+*/
+.sidebar-footer a.menu-link {
+    /* Remove a margem de item de menu padrão */
+    margin-bottom: 0;
+}
+
+.sidebar-footer a.menu-link:hover {
+    /* Usa a cor de perigo (vermelho) no hover */
+    background-color: var( --cor-primaria);
+    color: var(--cor-branca);
+}
+  
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-list li a {
+    display: block;
+    padding: 12px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--cor-sidebar-texto);
+    margin-bottom: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-list li a:hover {
+    background: var(--cor-sidebar-hover);
+    color: var(--cor-branca);
+}
+
+.menu-list li a.active {
+    background: var(--cor-primaria); /* Verde no item ativo */
+    color: var(--cor-branca);
+    font-weight: 600;
+}
+
+/* ===== 2. Área de Conteúdo (Principal) ===== */
+.content {
+    flex: 10;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Topbar (Barra Superior) */
+.topbar {
+    height: 54px;
+    background: var(--cor-card-fundo); /* MUDANÇA: Topbar também é escura */
+    border-bottom: 1px solid var(--cor-borda);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.topbar-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--cor-primaria); /* Título verde */
+}
+
+.topbar-user {
+    font-weight: 600;
+    color: var(--cor-texto-claro);
+}
+
+/* Área do conteúdo da página específica */
+.page-content {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Estilos de Card (para o conteúdo) */
+.card {
+    background: var(--cor-card-fundo); /* MUDANÇA: Card com fundo escuro */
+    padding: 24px;
+    border-radius: 8px;
+    /* MUDANÇA: Sombra removida, borda adicionada */
+    border: 1px solid var(--cor-borda);
+    margin-top: 12px;
+}
+
+.card h2 {
+    margin-top: 0;
+    color: var(--cor-primaria); /* Título do card verde */
+}
+#hamburger-btn {
+    display: none; 
+    font-size: 24px;
+    background: transparent;
+    border: none;
+    color: var(--cor-primaria);
+    cursor: pointer;
+
+    order: -1; 
+}
+
+
+@media (max-width: 768px) {
+    
+  
+    #hamburger-btn {
+        display: block;
+    }
+
+
+    .topbar {
+        justify-content: space-between;
+    }
+    .topbar-title {
+    
+        display: none; 
+    }
+
+    .sidebar {
+        position: fixed; 
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000; 
+        
+    
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-out;
+    }
+
+
+    .sidebar.sidebar-visible {
+        transform: translateX(0); 
+    }
+
+    #sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0; 
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999; 
+    }
+
+    #sidebar-overlay.visible {
+        display: block; 
+    }
+}

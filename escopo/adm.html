@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Usuários (Admin) - Plantão Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adm.css">
+    
+</head>
+   
+<body>
+ 
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+
+        <nav class="sidebar-menu">
+            <ul class="menu-list">
+                <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+        <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+          
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+</head>
+<body>
+    <nav>
+        </nav>
+
+    <main>
+         
+         <h1>Gestão de Usuários</h1>
+
+        <button onclick="location.href='cadastro.html'" type="button">Adicionar Novo Usuário</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Perfil </th>
+                    <th>Ações </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Usuario sobrenome</td>
+                    <td>usuario@empresa.com</td>
+                    <td>
+                        <select>
+                           <option value="admin" selected>admin </option>
+                            <option value="operator">operator </option>
+                            <option value="viewer">viewer</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button>Salvar</button>
+                        <button class="remover">Remover</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>administrador</td>
+                    <td>adm@empresa.com</td>
+                    <td>
+                        <select>
+                           <option value="admin" selected>admin </option>
+                            <option value="operator">operator </option>
+                            <option value="viewer">viewer</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button>Salvar</button>
+                        <button class="remover">Remover</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>operador</td>
+                    <td>operador@empresa.com</td>
+                    <td>
+                        <select>
+                           <option value="admin" >admin </option>
+                            <option value="operator" selected>operator </option>
+                            <option value="viewer">viewer</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button>Salvar</button>
+                        <button class="remover">Remover</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laura Assis</td>
+                    <td>laura.assis@empresa.com</td>
+                    <td>
+                        <select>
+                           <option value="admin" selected>admin </option>
+                            <option value="operator">operator </option>
+                            <option value="viewer">viewer</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button>Salvar</button>
+                        <button class="remover">Remover</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laura Monteiro</td>
+                    <td>laura.monteiro@empresa.com</td>
+                    <td>
+                        <select>
+                           <option value="admin" >admin </option>
+                            <option value="operator" selected>operator </option>
+                            <option value="viewer">viewer</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button>Salvar</button>
+                        <button class="remover">Remover</button>
+                    </td>
+                </tr>
+                 </tbody>
+        </table>
+    </main>
+    <div id="sidebar-overlay"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+            if (hamburgerBtn && sidebar && overlay) {
+      
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+    
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+</body>
+</html>

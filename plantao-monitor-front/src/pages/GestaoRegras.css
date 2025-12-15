@@ -1,0 +1,305 @@
+/* =========================================
+   ESTILO PADRÃO (Baseado em Incidentes.css)
+   Aplicado para Regras, Usuários e Rotas
+   ========================================= */
+
+.page-container,
+.regras-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    /* Sem animação */
+}
+
+/* =========================================
+   CABEÇALHO
+   ========================================= */
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-flex h1 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #ffffff;
+    /* Branco sólido */
+    font-weight: 700;
+}
+
+.header-flex small {
+    display: block;
+    color: #888;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* =========================================
+   BOTÕES
+   ========================================= */
+.actions-group {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-modern {
+    background-color: #6c757d;
+    /* Cinza estilo bootstrap/incidentes */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    /* Hover simples de cor */
+    transition: background-color 0.2s;
+}
+
+.btn-modern:hover {
+    background-color: #5a6268;
+    transform: none;
+    /* Sem movimento */
+    box-shadow: none;
+}
+
+.btn-primary {
+    background-color: #0f7436;
+    /* Verde padrão */
+}
+
+.btn-primary:hover {
+    background-color: #0c5e2b;
+}
+
+/* =========================================
+   TABELAS
+   ========================================= */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #1e1e1e;
+}
+
+.custom-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    background-color: #1e1e1e;
+}
+
+.custom-table th {
+    background-color: #0f7436;
+    /* Header verde igual Incidentes */
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #333;
+    white-space: nowrap;
+}
+
+.custom-table td {
+    border-bottom: 1px solid #333;
+    padding: 12px 16px;
+    color: #e0e0e0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.custom-table tr:hover {
+    background-color: #2c2c2c;
+    /* Hover simples de cor de fundo */
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.row-dimmed {
+    opacity: 0.6;
+}
+
+.actions-cell {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.btn-acao {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    text-decoration: none;
+}
+
+.btn-acao:hover {
+    background-color: #5a6268;
+    transform: none;
+}
+
+.btn-acao.btn-danger {
+    background-color: #dc3545;
+    /* Vermelho */
+}
+
+.btn-acao.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* =========================================
+   FORMULÁRIOS
+   ========================================= */
+.regras-container {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    /* Sombra removida ou suave */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.form-regra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1 1 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.full-width {
+    flex: 1 1 100%;
+}
+
+.form-group label {
+    font-weight: 700;
+    color: #0f7436;
+    /* Label verde igual Incidentes */
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    background-color: #252525;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: none;
+    /* Sem transição */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #0f7436;
+    outline: none;
+}
+
+.role-select {
+    padding: 5px;
+    border-radius: 4px;
+    background: #252525;
+    color: #fff;
+    border: 1px solid #333;
+    cursor: pointer;
+}
+
+/* =========================================
+   MODAIS
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    /* Fundo escuro simples */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: none;
+    /* Sem blur pesado */
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.tag-custom {
+    display: inline-block;
+    background: #0f7436;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+/* =========================================
+   RESPONSIVIDADE MOBILE
+   ========================================= */
+@media screen and (max-width: 768px) {
+
+    .regras-container,
+    .page-container {
+        padding: 15px;
+    }
+
+    .form-group {
+        flex: 1 1 100%;
+    }
+
+    .header-flex h1 {
+        font-size: 1.5rem;
+    }
+
+    .actions-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .actions-group button {
+        width: 100%;
+    }
+
+    .table-responsive {
+        border: 1px solid #333;
+    }
+}

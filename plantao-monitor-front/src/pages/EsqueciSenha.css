@@ -1,0 +1,89 @@
+.esqueci-senha-container {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.esqueci-senha-container * {
+    box-sizing: border-box;
+}
+
+.recuperar {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+.recuperar p {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.recuperar h2 {
+    font-size: 1.4rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.email-title {
+    margin-top: 2rem;
+}
+
+.recovery-form {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: center;
+    row-gap: 1rem;
+    column-gap: 1rem;
+}
+
+.recovery-form label {
+    grid-column: 1 / 2;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.4;
+}
+
+.recovery-form input {
+    grid-column: 2 / 3;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn {
+    grid-column: 2 / 3;
+    justify-self: start;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid #e9ecef;
+    margin-top: 2rem;
+}

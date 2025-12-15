@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Incidente - Plantão Monitor</title>
+
+    <link rel="stylesheet" href="adm.css"> 
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+        <nav>
+            <ul class="menu-list">
+                <li><a href="operador.html" class="menu-link">Inicio</a></li>
+                <li><a href="pagina_destino.html" class="menu-link">Incidentes</a></li>
+                <li><a href="escalas.html" class="menu-link">Escalas</a></li>
+                <li><a href="preferenciasoperador.html" class="menu-link">Notificações</a></li>
+                <li><a href="opedit.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="oplog.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="autenticacao.html" class="menu-link">
+                Sair 
+            </a>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+            <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+                <h2>Detalhes do Incidente</h2>
+            </div>
+            <div class="topbar-user">
+                <span>operador@gmail.com</span>
+            </div>
+        </header>
+
+        <section class="page-content">
+
+            <h1>Detalhes do Incidente</h1>
+
+            <div class="card">
+                <h2 id="incidente-regra">Carregando...</h2>
+                <hr>
+                
+                <h3>Descrição Detalhada</h3>
+                <p id="incidente-descricao">...</p>
+                
+                <h3>Status Atual</h3>
+                <p id="incidente-status">...</p>
+                
+                <h3>Plantonista Responsável</h3>
+                <p id="incidente-plantonista">...</p>
+
+                 <div class="actions-footer">
+                    <h3>Ações do operador</h3>
+                    <button class="ack">ACK </button>
+                  
+                </div>
+            </div>
+            
+            <button onclick="window.location.href='pagina_destino.html'" style="margin-top: 20px;">
+                Voltar ao Painel
+            </button>
+
+        </section> </main> <div id="sidebar-overlay"></div>
+
+    <script>
+    
+        const mockDatabase = {
+            "REGRA_001_FALHA_LOGIN": {
+                status: "OPEN",
+                prioridade: "Alta",
+                plantonista: "N/A",
+                descricao: "Falha crítica no login do módulo de pagamentos. Usuários não conseguem acessar."
+            },
+            "REGRA_002_TIMEOUT_API": {
+                status: "ACK",
+                prioridade: "Média",
+                plantonista: "operador1",
+                descricao: "API de consulta de CEP com latência acima de 5000ms."
+            },
+            "REGRA_003_DISK_SPACE": {
+                status: "CLOSED",
+                prioridade: "Baixa",
+                plantonista: "operador 2",
+                descricao: "Servidor DB-01 atingiu 80% de uso de disco. Resolvido com limpeza de logs."
+            },
+            "REGRA_004_ERRO_PLPGSQL": {
+                status: "OPEN",
+                prioridade: "Alta",
+                plantonista: "N/A",
+                descricao: "Procedure 'processar_pagamento' falhando com 'division by zero'."
+            }
+            // Adicione a 5ª regra aqui se precisar
+        };
+
+        // --- SCRIPT DA PÁGINA DE DETALHES ---
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Pega o ID da URL
+            // (Ex: de '.../detalhes.html?id=REGRA_001_FALHA_LOGIN')
+            const urlParams = new URLSearchParams(window.location.search);
+            const incidenteID = urlParams.get('id');
+
+            // 2. Encontra os dados no nosso "banco de dados"
+            const dadosDoIncidente = mockDatabase[incidenteID];
+
+            // 3. Pega os elementos "marcadores" (placeholders)
+            const elRegra = document.getElementById('incidente-regra');
+            const elDescricao = document.getElementById('incidente-descricao');
+            const elStatus = document.getElementById('incidente-status');
+            const elPlantonista = document.getElementById('incidente-plantonista');
+
+            // 4. Preenche a página com os dados
+            if (dadosDoIncidente) {
+                // Se encontrou o incidente, preenche os campos
+                elRegra.innerText = incidenteID;
+                elDescricao.innerText = dadosDoIncidente.descricao;
+                elStatus.innerText = dadosDoIncidente.status;
+                elPlantonista.innerText = dadosDoIncidente.plantonista;
+
+                // (Bônus) Aplica a cor do status
+                elStatus.classList.add('status-' + dadosDoIncidente.status.toLowerCase());
+
+            } else {
+                // Se o ID for inválido ou não encontrado
+                elRegra.innerText = "Incidente não encontrado";
+                elDescricao.innerText = "O ID fornecido não retornou nenhum dado.";
+                elStatus.innerText = "Erro";
+                elPlantonista.innerText = "N/A";
+            }
+        });
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Script: Menu Ativo ---
+            const currentPage = window.location.pathname.split('/').pop();
+            const menuLinks = document.querySelectorAll('.menu-list a');
+            const pageFile = (currentPage === 'pag_adm.html' || currentPage === '') ? 'Inicio' : '';
+
+            menuLinks.forEach(link => {
+                const linkPage = link.getAttribute('href').split('/').pop();
+                
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                }
+                if (pageFile === 'Inicio' && (link.innerText === 'Inicio')) {
+                     link.classList.add('active');
+                }
+            });
+
+            // --- Script: Menu Hambúrguer ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+                hamburgerBtn.addEventListener('click', toggleMenu);
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+
+</body>
+</html>

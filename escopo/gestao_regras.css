@@ -1,0 +1,166 @@
+﻿
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.logo {
+    max-width: 250px; 
+    margin-bottom: 1.5rem;
+}
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  line-height: 1.5;
+}
+nav {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+main {
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+h1 {
+  font-size: 1.6rem;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 8px 0 16px;
+  font-weight: 600;
+}
+
+button {
+  display: inline-block;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.05s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+button[type="button"] {
+  background-color: #0f6cbf;
+  color: #fff;
+}
+
+button[type="button"]:hover {
+  background-color: #0d5ea6;
+}
+
+button[type="submit"] {
+  background-color: #28a745;
+  color: #fff;
+}
+
+button[type="submit"]:hover {
+  background-color: #218838;
+}
+.form-regra {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  column-gap: 16px;
+  row-gap: 12px;
+}
+
+
+.form-regra label {
+  grid-column: 1 / 2;
+  font-weight: 600;
+  color: #555;
+  align-self: center;
+}
+
+.form-regra input[type="text"],
+.form-regra input[type="number"],
+.form-regra input[type="time"],
+.form-regra select,
+.form-regra textarea {
+  grid-column: 2 / 3;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.form-regra input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+.form-regra textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+#sql {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.form-regra input:focus,
+.form-regra select:focus,
+.form-regra textarea:focus {
+  outline: none;
+  border-color: #0f6cbf;
+  box-shadow: 0 0 0 3px rgba(15,108,191,0.15);
+}
+
+.form-regra button {
+  grid-column: 2 / 3;
+  justify-self: start;
+}
+.form-regra button + button {
+  margin-left: 8px;
+}
+
+@media (max-width: 640px) {
+  .form-regra {
+    grid-template-columns: 1fr;
+  }
+
+  .form-regra label,
+  .form-regra input[type="text"],
+  .form-regra input[type="number"],
+  .form-regra input[type="time"],
+  .form-regra select,
+  .form-regra textarea,
+  .form-regra button {
+    grid-column: 1 / 2;
+  }
+
+  .form-regra button {
+    width: 100%;
+  }
+}

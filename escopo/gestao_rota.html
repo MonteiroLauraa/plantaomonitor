@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Rota - Plantão Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adm.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+         <nav>
+            <ul class="menu-list">
+                 <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+           
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+</head>
+<body>
+    <nav>
+        </nav>
+
+    <main>
+        
+        <h1>Gestão de Rota</h1>
+
+        <form class="form-rota">
+            <h2>Agendar plantonista </h2>
+            
+            <label for="user_id">Usuário:</label>
+            <select id="user_id" name="user_id"> 
+                <option value="1">Laura Monteiro</option>
+                <option value="2">Outro Usuário</option>
+            </select>
+
+            <label for="start_dt">Início do Plantão:</label>
+            <input type="datetime-local" id="start_dt" name="start_dt">
+
+            <label for="end_dt">Fim do Plantão:</label>
+            <input type="datetime-local" id="end_dt" name="end_dt">
+
+            <label for="canal">Canal (Opcional):</label>
+            <input type="text" id="canal" name="canal">
+
+            <button type="submit">Salvar Agendamento</button>
+        </form>
+
+        <h2>Escala Atual</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Início</th>
+                    <th>Fim </th>
+                    <th>Canal </th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Laura Assis</td>
+                    <td>22/10/2025 08:00</td>
+                    <td>22/10/2025 18:00</td>
+                    <td>CANAIS_DIGITAIS</td>
+                    <td><button>Remover</button></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <td>Laura Assis</td>
+                    <td>23/10/2025 08:00</td>
+                    <td>23/10/2025 18:00</td>
+                    <td>CANAIS_DIGITAIS</td>
+                    <td><button>Remover</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>

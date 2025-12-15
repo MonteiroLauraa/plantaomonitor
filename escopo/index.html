@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Plantão Monitor — MVP Prototype</title>
+  <style>
+    /* ===== Styles (compact) ===== */
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
+    body{margin:0;display:flex;min-height:100vh;background:#f4f6f8;color:#111}
+    .sidebar{width:250px;background:#0f1724;color:#fff;padding:16px;display:flex;flex-direction:column}
+    .sidebar.collapsed{width:60px}
+    .brand{font-weight:700;margin-bottom:12px}
+    nav{flex:1;overflow:auto}
+    #menu-list{list-style:none;padding:0;margin:0}
+    #menu-list li{padding:8px 10px;border-radius:6px;cursor:pointer;color:#cbd5e1;margin-bottom:6px;font-size:14px}
+    #menu-list li.active{background:#1f2a44;color:#fff;font-weight:600}
+    .footer{font-size:12px;opacity:0.9;margin-top:12px}
+    .content{flex:1;display:flex;flex-direction:column}
+    .topbar{height:54px;background:#fff;border-bottom:1px solid #e6edf3;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:5}
+    .topbar .center{font-weight:600}
+    #screens{padding:24px;flex:1;overflow:auto}
+    .screen{max-width:1000px;margin:0 auto 40px}
+    .hidden{display:none}
+    .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,0.04);margin-top:12px}
+    .card-title{font-weight:700;margin-bottom:8px}
+    .row{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .btn{padding:8px 12px;border-radius:6px;border:1px solid #d1d5db;background:transparent;cursor:pointer}
+    .btn.primary{background:#0b5cff;color:#fff;border-color:transparent}
+    label{display:block;margin-bottom:8px;font-size:14px}
+    input[type=text], input, textarea, select{width:100%;padding:8px;border:1px solid #e6edf3;border-radius:6px}
+    .kpi-row{display:flex;gap:12px}
+    .kpi{background:#fff;padding:12px;border-radius:8px;min-width:120px;text-align:center;box-shadow:0 1px 2px rgba(16,24,40,0.04)}
+    .kpi strong{display:block;font-size:20px}
+    .incident-card{padding:8px;border-bottom:1px solid #f1f5f9}
+    .table{width:100%;border-collapse:collapse;margin-top:12px}
+    .table th, .table td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left}
+    .badge{padding:3px 8px;border-radius:999px;font-weight:700;font-size:12px;color:#fff}
+    .badge.open{background:#ef4444}
+    .badge.ack{background:#f59e0b}
+    .badge.closed{background:#10b981}
+    .timeline-item{padding:6px 0;border-bottom:1px dashed #eef2f7}
+    .console{background:#111;color:#fff;padding:12px;border-radius:6px;white-space:pre-wrap}
+    .site-footer{height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border-top:1px solid #eef2f7;color:#6b7280}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999;opacity:1;transition:opacity .12s ease}
+    .modal.hidden{display:none;opacity:0}
+    .modal-card{background:#fff;padding:16px;border-radius:8px;min-width:320px;max-width:720px;box-shadow:0 10px 30px rgba(2,6,23,0.3)}
+    .modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    .modal .modal-body textarea{width:100%;min-height:80px;padding:8px;border:1px solid #e6edf3;border-radius:6px}
+
+    /* small note style for requisitos */
+    .req-note{margin-top:12px;font-size:13px;color:#374151;background:#f8fafc;padding:10px;border-left:4px solid #0b5cff;border-radius:6px}
+
+    @media (max-width:900px){ .sidebar{display:none} .screen{padding:12px} .kpi-row{flex-wrap:wrap} }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Plantão Monitor (MVP)</div>
+    <nav>
+      <ul id="menu-list">
+        <li data-screen="login">1 · Login</li>
+        <li data-screen="onboarding">2 · Onboarding</li>
+        <li data-screen="dashboard">3 · Dashboard</li>
+        <li data-screen="incidents-list">4 · Incidents (lista)</li>
+        <li data-screen="incident-detail">5 · Incident (detalhe)</li>
+        <li data-screen="rules-list">6 · Regras (lista)</li>
+        <li data-screen="rule-editor">7 · Rule Editor</li>
+        <li data-screen="rule-test">8 · Teste de Regra</li>
+        <li data-screen="runner">9 · Runner / Scheduler</li>
+        <li data-screen="users-list">10 · Usuários (lista)</li>
+        <li data-screen="user-edit">11 · User — Edit</li>
+        <li data-screen="prefs">12 · Preferências</li>
+        <li data-screen="notif-channels">13 · Canais Notificação</li>
+        <li data-screen="escalation">14 · Escalonamento</li>
+        <li data-screen="logs">15 · Logs & Auditoria</li>
+        <li data-screen="reports">16 · Relatórios</li>
+        <li data-screen="settings">17 · Settings / API</li>
+        <li data-screen="help">18 · Help / Glossário</li>
+        <li data-screen="error">19 · Permissão / 404</li>
+      </ul>
+    </nav>
+    <div class="footer">QQTECH9</div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="left"><button id="toggle-sidebar" class="btn">☰</button></div>
+      <div class="center">Plantão Monitor — MVP</div>
+      <div class="right">Usuário: <strong id="top-user">operador.mock</strong></div>
+    </header>
+
+    <section id="screens">
+      <!-- 1 Login -->
+      <article id="login" class="screen">
+        <h2>1 — Login (Firebase)</h2>
+        <p>Autentique-se. Credenciais de teste são aceitas neste ambiente.</p>
+        <form id="login-form" class="card" onsubmit="event.preventDefault(); doLogin();">
+          <label>Usuário<input id="login-user" value="operador.mock" /></label>
+          <label>Senha<input id="login-pass" type="password" value="mock" /></label>
+          <div class="row">
+            <button type="button" class="btn primary" onclick="doLogin()">Fazer login</button>
+            <button type="button" class="btn" onclick="openModal('Confirm','<p>Entrar como visitante? Isso simula usuário sem permissão.</p>', function(){ showScreen('error'); })">Entrar como visitante (simula sem permissão)</button>
+          </div>
+
+          <!-- Requisitos associados: RF01, RF02, RF18, RF14 -->
+          <div class="req-note">
+            <strong>Requisitos associados:</strong> RF01 — Autenticação via Firebase; RF02 — Autorização / Perfis (admin, operator, viewer); RF18 — Segurança e Privacidade; RF14 — Logs & Auditoria.
+          </div>
+        </form>
+      </article>
+
+      <!-- 2 Onboarding -->
+      <article id="onboarding" class="screen hidden">
+        <h2>2 — Onboarding / Primeiro acesso</h2>
+        <div class="card">
+          <p>Primeiro acesso detectado: provisionamento realizado (role: operator).</p>
+          <div class="row"><button class="btn primary" onclick="showScreen('dashboard')">Ir para Dashboard</button></div>
+        </div>
+      </article>
+
+      <!-- 3 Dashboard -->
+      <article id="dashboard" class="screen hidden">
+        <h2>3 — Dashboard (Tempo real)</h2>
+        <div class="kpi-row">
+          <div class="kpi"><strong id="kpi-open">0</strong><span>Open</span></div>
+          <div class="kpi"><strong id="kpi-acked">0</strong><span>Acked</span></div>
+          <div class="kpi"><strong id="kpi-resolved">0</strong><span>Resolved</span></div>
+          <div class="kpi"><strong id="kpi-error-rate">0%</strong><span>Rule error rate</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Feed de Incidentes</div>
+          <input id="search-incidents" placeholder="Pesquisar por regra, status, prioridade..." oninput="renderIncidentsList()">
+          <div id="incidents-shortlist"></div>
+          <div class="row"><button class="btn" onclick="showScreen('incidents-list')">Abrir lista completa</button></div>
+        </div>
+      </article>
+
+      <!-- 4 Incidents list -->
+      <article id="incidents-list" class="screen hidden">
+        <h2>4 — Incidents — Lista</h2>
+        <div class="card">
+          <div class="filters">
+            <select id="filter-status" onchange="renderIncidentsList()">
+              <option value="">Todos os status</option>
+              <option>OPEN</option><option>ACK</option><option>CLOSED</option>
+            </select>
+            <select id="filter-role" onchange="renderIncidentsList()">
+              <option value="">Todos os papéis</option>
+              <option>CANAIS_DIGITAIS</option><option>INFRA</option>
+            </select>
+          </div>
+          <table class="table" id="incidents-table">
+            <thead><tr><th>ID</th><th>Regra</th><th>Status</th><th>Prioridade</th><th>Último</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- 5 Incident detail -->
+      <article id="incident-detail" class="screen hidden">
+        <h2>5 — Incident — Detalhe</h2>
+        <div class="card">
+          <div id="incident-info"></div>
+          <div class="row">
+            <button class="btn primary" onclick="modalAck()">ACK</button>
+            <button class="btn" onclick="modalClose()">CLOSE</button>
+            <button class="btn" onclick="modalReexecute()">REEXECUTE</button>
+            <button class="btn" onclick="showScreen('incidents-list')">Voltar à lista</button>
+          </div>
+          <div class="card-title">Timeline / Logs</div>
+          <div id="incident-timeline"></div>
+        </div>
+      </article>
+
+      <!-- 6 Rules list -->
+      <article id="rules-list" class="screen hidden">
+        <h2>6 — Regras (Lista)</h2>
+        <div class="card">
+          <div class="row">
+            <button class="btn primary" onclick="showScreen('rule-editor')">Criar Nova Regra</button>
+            <input id="search-rules" placeholder="Pesquisar regra..." oninput="renderRulesList()">
+          </div>
+          <table class="table" id="rules-table"><thead><tr><th>ID</th><th>Nome</th><th>Banco</th><th>Prioridade</th><th>Último run</th><th>Ações</th></tr></thead><tbody></tbody></table>
+        </div>
+      </article>
+
+      <!-- 7 Rule editor -->
+      <article id="rule-editor" class="screen hidden">
+        <h2>7 — Rule Editor (Create / Edit)</h2>
+        <div class="card">
+          <label>Nome<input id="rule-name"></label>
+          <label>Banco<select id="rule-db"><option>Postgres</option><option>Oracle</option></select></label>
+          <label>Prioridade<select id="rule-priority"><option>Low</option><option>Medium</option><option>High</option></select></label>
+          <label>Janela horário<input id="rule-window" placeholder="ex.: 00:00-23:59"></label>
+          <label>SQL<textarea id="rule-sql" rows="6">-- Exemplo: SELECT count(*) FROM tabela WHERE condição;</textarea></label>
+          <div class="row">
+            <button class="btn primary" onclick="saveRule()">Salvar</button>
+            <button class="btn" onclick="showScreen('rules-list')">Cancelar</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 8 Rule test -->
+      <article id="rule-test" class="screen hidden">
+        <h2>8 — Teste de Regra</h2>
+        <div class="card">
+          <div class="card-title">Console de Teste</div>
+          <textarea id="rule-test-sql" rows="4"></textarea>
+          <div class="row"><button class="btn primary" onclick="runRuleTest()">Executar Teste</button></div>
+          <pre id="rule-test-output" class="console"></pre>
+        </div>
+      </article>
+
+      <!-- 9 Runner -->
+      <article id="runner" class="screen hidden">
+        <h2>9 — Runner / Scheduler</h2>
+        <div class="card">
+          <p>Status do runner: <strong id="runner-status">Idle</strong></p>
+          <div class="row"><button class="btn" onclick="toggleRunner()">Start / Stop</button></div>
+          <div class="card-title">Fila / Próximas execuções</div>
+          <ul id="runner-queue"></ul>
+        </div>
+      </article>
+
+      <!-- 10 Users list -->
+      <article id="users-list" class="screen hidden">
+        <h2>10 — Usuários (Lista)</h2>
+        <div class="card">
+          <div class="row"><button class="btn primary" onclick="showScreen('user-edit')">Criar Usuário</button></div>
+          <table class="table" id="users-table"><thead><tr><th>ID</th><th>Nome</th><th>Role</th><th>Último login</th><th>Ações</th></tr></thead><tbody></tbody></table>
+        </div>
+      </article>
+
+      <!-- 11 User edit -->
+      <article id="user-edit" class="screen hidden">
+        <h2>11 — User — Edit / Role</h2>
+        <div class="card">
+          <label>Nome<input id="user-name"></label>
+          <label>Email<input id="user-email"></label>
+          <label>Role<select id="user-role"><option>admin</option><option>operator</option><option>viewer</option></select></label>
+          <div class="row"><button class="btn primary" onclick="saveUser()">Salvar</button><button class="btn" onclick="showScreen('users-list')">Cancelar</button></div>
+        </div>
+      </article>
+
+      <!-- 12 Preferences -->
+      <article id="prefs" class="screen hidden">
+        <h2>12 — Preferências de Notificação</h2>
+        <div class="card">
+          <label><input type="checkbox" id="pref-enable-push"> Habilitar Push</label>
+          <label><input type="checkbox" id="pref-push-sound"> Som de Push</label>
+          <label>Janela de não perturbe (start/end) <input id="pref-start" placeholder="00:00"> — <input id="pref-end" placeholder="23:59"></label>
+          <div class="row"><button class="btn primary" onclick="savePrefs()">Salvar</button></div>
+        </div>
+      </article>
+
+      <!-- 13 Notification channels -->
+      <article id="notif-channels" class="screen hidden">
+        <h2>13 — Canais de Notificação</h2>
+        <div class="card">
+          <label>Firebase Server Key<input id="cfg-firebase"></label>
+          <label>SMTP Host<input id="cfg-smtp"></label>
+          <label>Slack Webhook<input id="cfg-slack"></label>
+          <div class="row"><button class="btn primary" onclick="saveChannels()">Salvar</button></div>
+        </div>
+      </article>
+
+      <!-- 14 Escalation policies -->
+      <article id="escalation" class="screen hidden">
+        <h2>14 — Escalonamento Automático</h2>
+        <div class="card">
+          <div class="card-title">Políticas</div>
+          <table class="table"><thead><tr><th>Policy</th><th>Timeout (min)</th><th>Ações</th></tr></thead><tbody id="escalation-table"></tbody></table>
+          <div class="row"><button class="btn" onclick="addEscalation()">Adicionar</button></div>
+        </div>
+      </article>
+
+      <!-- 15 Logs & Audit -->
+      <article id="logs" class="screen hidden">
+        <h2>15 — Logs & Auditoria</h2>
+        <div class="card">
+          <div class="card-title">Execuções Recentes</div>
+          <table class="table" id="logs-table"><thead><tr><th>Run ID</th><th>Rule</th><th>Result</th><th>Duration</th></tr></thead><tbody></tbody></table>
+        </div>
+      </article>
+
+      <!-- 16 Reports -->
+      <article id="reports" class="screen hidden">
+        <h2>16 — Relatórios & Métricas</h2>
+        <div class="card">
+          <div class="card-title">Métricas</div>
+          <ul id="metrics-list"></ul>
+          <div class="row"><button class="btn" onclick="downloadCSV()">Exportar CSV</button></div>
+        </div>
+      </article>
+
+      <!-- 17 Settings / API -->
+      <article id="settings" class="screen hidden">
+        <h2>17 — Settings / Integrations / API</h2>
+        <div class="card">
+          <label>Service Account (Firebase) <input id="sa-key"></label>
+          <label>API Token <input id="api-token" value="mock_token_123"></label>
+          <div class="row"><button class="btn primary" onclick="saveSettings()">Salvar</button></div>
+        </div>
+      </article>
+
+      <!-- 18 Help / Glossary -->
+      <article id="help" class="screen hidden">
+        <h2>18 — Help / Glossário</h2>
+        <div class="card">
+          <dl>
+            <dt>Runner</dt><dd>Serviço que executa regras programadas.</dd>
+            <dt>Incident</dt><dd>Agrupamento de ocorrências relacionadas a uma regra/erro.</dd>
+            <dt>ACK</dt><dd>Confirmação recebida por um plantonista indicando que está ciente.</dd>
+            <dt>Role</dt><dd>Etiqueta que mapeia regras a grupos de usuários (ex.: CANAIS_DIGITAIS).</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- 19 Error / No permission -->
+      <article id="error" class="screen hidden">
+        <h2>19 — Erro / Permissão</h2>
+        <div class="card">
+          <p>Você não tem permissão para acessar esta área ou houve um erro.</p>
+          <div class="row"><button class="btn" onclick="showScreen('dashboard')">Voltar ao Dashboard</button></div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="site-footer">
+      QQTECH9 — Ambiente de Teste
+    </footer>
+  </main>
+
+  <!-- Modal (single, reused) -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card" id="modal-card" tabindex="0">
+      <h3 id="modal-title">Confirmar</h3>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn">Cancelar</button>
+        <button id="modal-confirm" class="btn primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /***** Mock data (para protótipo) *****/
+    const mock = {
+      user: {id: 'u1', name:'Operador Mock', role:'operator'},
+      incidents: [
+        {id:'INC-1001', rule:'Regra - Checagem de saldo', status:'OPEN', priority:'High', last:'2025-10-22 09:00', description:'Muitos erros na view X', timeline: [{t:'2025-10-22T09:00', msg:'Detected'}, {t:'2025-10-22T09:02', msg:'Notified'}]},
+        {id:'INC-1002', rule:'Regra - Backup falha', status:'ACK', priority:'Medium', last:'2025-10-21 17:22', description:'Backup não finalizado', timeline: [{t:'2025-10-21T17:22', msg:'Detected'}, {t:'2025-10-21T17:30', msg:'ACK by operador'}]},
+        {id:'INC-1003', rule:'Regra - Latência alta', status:'CLOSED', priority:'Low', last:'2025-10-20 11:11', description:'Latência pontual', timeline: [{t:'2025-10-20T11:11', msg:'Detected'}, {t:'2025-10-20T11:40', msg:'Closed automatically'}]}
+      ],
+      rules: [
+        {id:'R-001', name:'Checagem de saldo', db:'Postgres', priority:'High', last_run:'2025-10-22 09:00', sql:'SELECT count(*) FROM pagamentos WHERE status="FAILED";'},
+        {id:'R-002', name:'Backup falha', db:'Oracle', priority:'Medium', last_run:'2025-10-21 17:20', sql:'SELECT * FROM backups WHERE status != "DONE";'}
+      ],
+      users: [
+        {id:'u1', name:'Operador Mock', role:'operator', last_login:'2025-10-22 08:00'},
+        {id:'u2', name:'Admin Demo', role:'admin', last_login:'2025-09-30 10:10'}
+      ],
+      logs: [
+        {run:'run-1', rule:'R-001', result:'OK', duration:'1.2s'},
+        {run:'run-2', rule:'R-002', result:'ERROR', duration:'0.8s'}
+      ],
+      escalations: [
+        {policy:'Default', timeout:10}
+      ],
+      metrics: {
+        incident_created: 123, ack_time: '00:05:20', resolve_time: '00:22:10', rule_error_rate:'3%'
+      }
+    };
+
+    /***** Navegação e renderização básica *****/
+
+    /*
+      RF03 — Gestão de Usuários: navegação e renderização das telas que envolvem usuários.
+      RF02 — Autorização: lógica de exibição depende do perfil (no backend isso deve ser validado).
+    */
+    function showScreen(id){
+      document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('hidden');
+      highlightMenu(id);
+      if(id==='dashboard') renderDashboard();
+      if(id==='incidents-list') renderIncidentsList();
+      if(id==='rules-list') renderRulesList();
+      if(id==='incident-detail') renderIncidentDetail(currentIncidentId || mock.incidents[0].id);
+      if(id==='runner') renderRunner();
+      if(id==='users-list') renderUsers();
+      if(id==='logs') renderLogs();
+      if(id==='reports') renderMetrics();
+      if(id==='escalation') renderEscalations();
+    }
+    document.querySelectorAll('#menu-list li').forEach(li=>li.addEventListener('click', ()=> showScreen(li.dataset.screen)));
+    let currentIncidentId = null;
+    showScreen('login');
+
+    function highlightMenu(screenId){
+      document.querySelectorAll('#menu-list li').forEach(li=>{
+        li.classList.toggle('active', li.dataset.screen===screenId);
+      });
+    }
+
+    // Alterna visual do menu lateral (UI)
+    document.getElementById('toggle-sidebar').addEventListener('click', ()=> document.querySelector('.sidebar').classList.toggle('collapsed'));
+
+    /***** Renderers (UI) *****/
+
+    /* RF13 / RF15 / RF14
+       Dashboard: apresenta KPIs de incidentes e taxa de erro.
+       RF13 (Painel em tempo real) e RF15 (Relatórios) se aplicam aqui.
+    */
+    function renderDashboard(){
+      document.getElementById('kpi-open').innerText = mock.incidents.filter(i=>i.status==='OPEN').length;
+      document.getElementById('kpi-acked').innerText = mock.incidents.filter(i=>i.status==='ACK').length;
+      document.getElementById('kpi-resolved').innerText = mock.incidents.filter(i=>i.status==='CLOSED').length;
+      document.getElementById('kpi-error-rate').innerText = mock.metrics.rule_error_rate;
+      const shortlist = mock.incidents.slice(0,3).map(i=>`<div class="incident-card"><strong>${i.id}</strong> — ${i.rule} <span class="badge ${i.status.toLowerCase()}">${i.status}</span></div>`).join('');
+      document.getElementById('incidents-shortlist').innerHTML = shortlist;
+      renderIncidentsList();
+    }
+
+    /* RF08, RF14
+       Render da lista de incidentes — filtros e pesquisa para QA.
+       RF08: fluxo de incidentes (OPEN→ACK→CLOSED).
+       RF14: auditoria/registro deve ocorrer no backend.
+    */
+    function renderIncidentsList(){
+      const tbody = document.querySelector('#incidents-table tbody');
+      const q = document.getElementById('search-incidents')?.value?.toLowerCase() || '';
+      const statusFilter = document.getElementById('filter-status')?.value || '';
+      tbody.innerHTML = '';
+      mock.incidents.filter(i=> (q==='' || (i.rule+i.id+i.description).toLowerCase().includes(q)) && (statusFilter===''|| i.status===statusFilter)).forEach(i=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i.id}</td><td>${i.rule}</td><td><span class="badge ${i.status.toLowerCase()}">${i.status}</span></td><td>${i.priority}</td><td>${i.last}</td><td><button class="btn" onclick="openIncident('${i.id}')">Abrir</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* RF08
+       Abrir incidente em detalhe (UI). Ações (ACK/CLOSE/REEXECUTE) ligam aos modais.
+    */
+    function openIncident(id){
+      currentIncidentId = id;
+      showScreen('incident-detail');
+    }
+
+    /* RF08, RF14
+       Render dos detalhes do incidente e timeline. Logs de mudanças devem ser gravados no backend.
+    */
+    function renderIncidentDetail(id){
+      const inc = mock.incidents.find(x=>x.id===id);
+      if(!inc) { document.getElementById('incident-info').innerText = 'Incidente não encontrado.'; return; }
+      document.getElementById('incident-info').innerHTML = `<h3>${inc.id} — ${inc.rule} <span class="badge ${inc.status.toLowerCase()}">${inc.status}</span></h3><p>${inc.description}</p>`;
+      document.getElementById('incident-timeline').innerHTML = inc.timeline.map(t=>`<div class="timeline-item"><strong>${t.t}</strong> — ${t.msg}</div>`).join('');
+    }
+
+    /* RF05, RF16, RF14
+       Listagem e edição de regras. RF05 (CRUD de regras), RF16 (teste e validação), RF14 (logs).
+    */
+    function renderRulesList(){
+      const tbody = document.querySelector('#rules-table tbody');
+      const q = document.getElementById('search-rules')?.value?.toLowerCase()||'';
+      tbody.innerHTML='';
+      mock.rules.filter(r=> q==='' || (r.name+r.id+r.sql).toLowerCase().includes(q)).forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${r.id}</td><td>${r.name}</td><td>${r.db}</td><td>${r.priority}</td><td>${r.last_run}</td><td><button class="btn" onclick="editRule('${r.id}')">Editar</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* RF05
+       Preenche o editor com os dados da regra selecionada.
+    */
+    function editRule(id){ const r = mock.rules.find(x=>x.id===id); if(!r) return; showScreen('rule-editor'); document.getElementById('rule-name').value=r.name; document.getElementById('rule-db').value=r.db; document.getElementById('rule-priority').value=r.priority; document.getElementById('rule-window').value='00:00-23:59'; document.getElementById('rule-sql').value=r.sql; }
+
+    /* RF05, RF14
+       Salva/insere regra (mock). Em produção: validação de SQL, gravação e auditoria.
+    */
+    function saveRule(){ const name=document.getElementById('rule-name').value; if(!name){ alert('Nome obrigatório'); return; } mock.rules.push({id:'R-'+(100+mock.rules.length), name, db:document.getElementById('rule-db').value, priority:document.getElementById('rule-priority').value, last_run:'never', sql:document.getElementById('rule-sql').value}); alert('Regra salva'); showScreen('rules-list'); }
+
+    /* RF16
+       Executa teste de SQL no ambiente de teste (mock). Em produção: execução isolada, captura de erros e logs.
+    */
+    function runRuleTest(){ const sql=document.getElementById('rule-test-sql').value || 'SELECT 1'; document.getElementById('rule-test-output').innerText = 'Resultado (mock):\n1 row\n-- SQL: '+sql; }
+
+    // Runner
+
+    /* RF06, RF14
+       Render do runner (status e fila). RF06: execução agendada; RF14: logs de execução.
+    */
+    let runnerRunning=false;
+    function renderRunner(){ document.getElementById('runner-status').innerText = runnerRunning ? 'Running' : 'Idle'; const q = document.getElementById('runner-queue'); q.innerHTML=''; mock.rules.forEach(r=>{ const li = document.createElement('li'); li.innerText = `${r.id} — ${r.name} (next run in 5m)`; q.appendChild(li); }); }
+
+    /* RF06
+       Ligar/desligar runner (mock). Em produção: chamadas ao serviço de scheduling.
+    */
+    function toggleRunner(){ runnerRunning = !runnerRunning; renderRunner(); alert('Runner toggled (mock)'); }
+
+    // Usuários
+
+    /* RF03, RF02, RF14
+       Renderizar lista de usuários (CRUD). RF03: CRUD; RF02: perfis/roles; RF14: logs.
+    */
+    function renderUsers(){ const tbody=document.querySelector('#users-table tbody'); tbody.innerHTML=''; mock.users.forEach(u=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>${u.name}</td><td>${u.role}</td><td>${u.last_login}</td><td><button class="btn" onclick="editUser('${u.id}')">Editar</button></td>`; tbody.appendChild(tr); }); }
+
+    /* RF03
+       Preenche formulário de edição/novo usuário.
+    */
+    function editUser(id){ const u=mock.users.find(x=>x.id===id); showScreen('user-edit'); document.getElementById('user-name').value=u.name; document.getElementById('user-email').value=u.id+'@mock.local'; document.getElementById('user-role').value=u.role; }
+
+    /* RF03, RF14
+       Salva usuário (mock). Em backend: validação, criação e auditoria.
+    */
+    function saveUser(){ const name=document.getElementById('user-name').value; mock.users.push({id:'u'+(mock.users.length+1), name, role: document.getElementById('user-role').value, last_login:'never'}); alert('Usuário salvo'); showScreen('users-list'); }
+
+    // Preferências / Canais / Settings
+
+    /* RF04
+       Salva preferências de notificação (mock). Backend deve persistir por usuário.
+    */
+    function savePrefs(){ alert('Preferências salvas'); showScreen('dashboard'); }
+
+    /* RF12
+       Salva canais de notificação (Firebase/SMTP/Slack) — em produção: armazenar com segurança.
+    */
+    function saveChannels(){ alert('Canais salvos'); showScreen('settings'); }
+
+    /* RF18, RF19, RF14
+       Salva configurações e tokens de integração (ex.: service account). Exigir permissão admin e registrar auditoria.
+    */
+    function saveSettings(){ alert('Configurações salvas'); showScreen('settings'); }
+
+    // Escalonamento
+
+    /* RF10
+       Render, adicionar e remover políticas de escalonamento.
+    */
+    function renderEscalations(){ const tbody=document.getElementById('escalation-table'); tbody.innerHTML=''; mock.escalations.forEach(e=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${e.policy}</td><td>${e.timeout}</td><td><button class="btn" onclick="removeEscalation('${e.policy}')">Remover</button></td>`; tbody.appendChild(tr); }); }
+    function addEscalation(){ mock.escalations.push({policy:'New', timeout:5}); renderEscalations(); }
+    function removeEscalation(policy){ mock.escalations = mock.escalations.filter(e=>e.policy!==policy); renderEscalations(); }
+
+    // Logs & Metrics
+
+    /* RF14
+       Render de logs (execuções) — em ambiente real, consumir API de logs.
+    */
+    function renderLogs(){ const tbody=document.querySelector('#logs-table tbody'); tbody.innerHTML=''; mock.logs.forEach(l=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${l.run}</td><td>${l.rule}</td><td>${l.result}</td><td>${l.duration}</td>`; tbody.appendChild(tr); }); }
+
+    /* RF15, RF14
+       Render de métricas e export CSV para análise. Em produção: endpoints específicos.
+    */
+    function renderMetrics(){ const el=document.getElementById('metrics-list'); el.innerHTML=''; Object.keys(mock.metrics).forEach(k=>{ const li = document.createElement('li'); li.innerText = k+': '+mock.metrics[k]; el.appendChild(li); }); }
+    function downloadCSV(){
+      const rows=[['metric','value']]; Object.entries(mock.metrics).forEach(([k,v])=>rows.push([k,v])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'); const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='metrics.csv'; a.click();
+    }
+
+    /***** Modal: implementação robusta *****/
+
+    // Elementos do modal (reutilizável)
+    const modal = document.getElementById('modal');
+    const modalCard = document.getElementById('modal-card');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const btnConfirm = document.getElementById('modal-confirm');
+    const btnCancel = document.getElementById('modal-cancel');
+
+    // Armazena callback atual para o Confirm
+    let currentOnConfirm = null;
+
+    /*
+      RF09 — Ações do Operador: modal reutilizável para ACK/CLOSE/REEXECUTE.
+      Comportamento: fechar ao confirmar, cancelar, clicar fora ou Esc.
+    */
+    function openModal(title, bodyHtml, onConfirm){
+      modalTitle.innerText = title || 'Confirmar';
+      if(typeof bodyHtml === 'string'){
+        modalBody.innerHTML = bodyHtml;
+      } else {
+        modalBody.innerHTML = '';
+        modalBody.appendChild(bodyHtml);
+      }
+
+      // encapsula callback para garantir fechamento do modal
+      currentOnConfirm = function(){
+        try {
+          if(typeof onConfirm === 'function') onConfirm();
+        } catch(err){
+          console.error('Erro em onConfirm:', err);
+        } finally {
+          closeModal();
+        }
+      };
+
+      // sobrescreve handlers anteriores
+      btnConfirm.onclick = currentOnConfirm;
+      btnCancel.onclick = closeModal;
+
+      // exibe modal e foca para acessibilidade
+      modal.classList.remove('hidden');
+      setTimeout(()=> modalCard.focus(), 80);
+    }
+
+    // Fecha o modal e limpa handlers
+    function closeModal(){
+      btnConfirm.onclick = null;
+      btnCancel.onclick = null;
+      currentOnConfirm = null;
+      modal.classList.add('hidden');
+    }
+
+    // Fecha clicando no overlay
+    modal.addEventListener('click', function(e){
+      if(e.target === modal) closeModal();
+    });
+
+    // Fecha ao pressionar Esc
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && !modal.classList.contains('hidden')){
+        closeModal();
+      }
+    });
+
+    /* RF09, RF08, RF14
+       Ações que disparam modais: ACK, CLOSE, REEXECUTE.
+       Cada ação no backend deve gravar o evento (auditoria).
+    */
+    function modalAck(){ openModal('ACK', '<label>Comentário<textarea id="ack-comment"></textarea></label>', function(){ alert('ACK enviado'); renderIncidentDetail(currentIncidentId); }); }
+    function modalClose(){ openModal('CLOSE', '<label>Comentário<textarea id="close-comment"></textarea></label>', function(){ alert('Closed'); showScreen('incidents-list'); }); }
+    function modalReexecute(){ openModal('REEXECUTE', '<p>Executar regra novamente.</p>', function(){ alert('Reexecutado'); }); }
+
+    /***** Fluxo de autenticação simplificado (protótipo) *****/
+
+    /*
+      RF01 — Autenticação via Firebase: autenticar usuário.
+      RF02 — Autorização: associar role e proteger rotas.
+      RF14 — Logs: registrar tentativas de login.
+      RF18 — Segurança: proteger tokens (no backend).
+    */
+    function doLogin(){
+      // Em um ambiente real: chamar Firebase Auth -> provisionamento -> redirecionamento
+      document.getElementById('top-user').innerText = document.getElementById('login-user').value || 'operador';
+      showScreen('onboarding');
+
+      // Atualiza views iniciais (mock)
+      setTimeout(()=>{ renderDashboard(); renderRulesList(); renderUsers(); renderLogs(); renderEscalations(); }, 200);
+    }
+
+    // Inicializa vistas
+    function init(){ renderDashboard(); renderRulesList(); renderUsers(); renderLogs(); renderEscalations(); }
+    init();
+  </script>
+</body>
+</html>

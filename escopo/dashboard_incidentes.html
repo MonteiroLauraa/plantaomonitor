@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Incidentes - Plantão Monitor</title>
+
+    <link rel="stylesheet" href="adm.css"> 
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+        <nav>
+            <ul class="menu-list">
+                <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+            
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+
+        <section class="page-content">
+
+            <h1>Painel de Incidentes em Tempo Real</h1>
+
+            <section class="metricas">
+                <h2>Métricas Principais</h2>
+                <div>Incidentes Criados: <span>5</span></div>
+                <div>Tempo Médio de ACK: <span>5m 12s</span></div>
+                <div>Tempo Médio de Resolução: <span>30m 45s</span></div>
+                <button id="export-csv-btn" type="button">Exportar CSV</button>
+            </section>
+
+            <section class="filtros">
+                <h3>Filtros</h3>
+                <form id="filtro-form">
+                    <label for="status">Status:</label>
+                    <select id="filtro-status" name="status">
+                        <option value="todos" selected>Todos</option> 
+                        <option value="open">OPEN</option>
+                        <option value="ack">ACK</option>
+                        <option value="closed">CLOSED</option>
+                    </select>
+                    <label for="regra">Regra:</label>
+                    <input type="text" id="filtro-regra" name="regra" placeholder="Digite o nome da regra...">
+                    
+                    <button type="submit" disabled>Filtrar</button>
+                </form>
+            </section>
+
+            <section class="feed-incidentes">
+                <h2>Feed de Incidentes</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Regra</th>
+                            <th>Status</th>
+                            <th>Prioridade</th>
+                            <th>Ocorrência</th>
+                            <th>Plantonista</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-incidentes">
+                        <tr data-status="open" data-regra="REGRA_001_FALHA_LOGIN" data-detalhes="Falha crítica no login do módulo de pagamentos. Usuários não conseguem acessar.">
+                            <td>REGRA_001_FALHA_LOGIN</td>
+                            <td class="status-open">OPEN</td>
+                            <td>Alta</td>
+                            <td>2025-10-26 10:30:00</td>
+                            <td>N/A</td>
+                            <td>
+                                <button class="details">Detalhes</button>
+                            </td>
+                        </tr>
+                        <tr data-status="ack" data-regra="REGRA_002_TIMEOUT_API" data-detalhes="API de consulta de CEP com latência acima de 5000ms.">
+                            <td>REGRA_002_TIMEOUT_API</td>
+                            <td class="status-ack">ACK</td>
+                            <td>Média</td>
+                            <td>2025-10-26 10:25:00</td>
+                            <td>operador1</td>
+                            <td>
+                             
+                                <button class="details">Detalhes</button>
+                            </td>
+                        </tr>
+                        <tr data-status="closed" data-regra="REGRA_003_DISK_SPACE" data-detalhes="Servidor DB-01 atingiu 80% de uso de disco. Resolvido com limpeza de logs.">
+                            <td>REGRA_003_DISK_SPACE</td>
+                            <td class="status-closed">CLOSED</td>
+                            <td>Baixa</td>
+                            <td>2025-10-26 09:15:00</td>
+                            <td>operador 2</td>
+                            <td>
+                               
+                                <button class="details">Detalhes</button>
+                            </td>
+                        </tr>
+                        <tr data-status="open" data-regra="REGRA_004_ERRO_PLPGSQL" data-detalhes="Procedure 'processar_pagamento' falhando com 'division by zero'.">
+                            <td>REGRA_004_ERRO_PLPGSQL</td>
+                            <td class="status-open">OPEN</td>
+                            <td>Alta</td>
+                            <td>2025-10-26 10:32:00</td>
+                            <td>N/A</td>
+                            <td>
+                               
+                                <button class="details">Detalhes</button>
+                            </td>
+                        </tr>
+                        <tr data-status="closed" data-regra="REGRA_002_TIMEOUT_API" data-detalhes="API de CEP normalizada. Latência voltou para 200ms.">
+                            <td>REGRA_002_TIMEOUT_API</td>
+                            <td class="status-closed">CLOSED</td>
+                            <td>Média</td>
+                            <td>2025-10-26 08:30:00</td>
+                            <td>operador 3 </td>
+                            <td>
+                        
+                                <button class="details">Detalhes</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </section> </main> <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const filtroForm = document.getElementById('filtro-form');
+            const filtroStatus = document.getElementById('filtro-status');
+            const filtroRegra = document.getElementById('filtro-regra');
+            const tabelaIncidentes = document.getElementById('tabela-incidentes');
+            
+            // --- NOVA LINHA: Encontra o botão de exportar ---
+            const exportBtn = document.getElementById('export-csv-btn');
+
+            if (tabelaIncidentes) {
+                const todasAsLinhas = tabelaIncidentes.querySelectorAll('tr');
+
+                // --- 1. FUNCIONALIDADE DO FILTRO (Sem alteração) ---
+                function aplicarFiltros() {
+                    const statusValor = filtroStatus.value.toLowerCase();
+                    const regraValor = filtroRegra.value.toLowerCase();
+
+                    todasAsLinhas.forEach(function(linha) {
+                        const statusLinha = linha.dataset.status.toLowerCase();
+                        const regraLinha = linha.dataset.regra.toLowerCase();
+                        const matchStatus = (statusValor === 'todos' || statusLinha === statusValor);
+                        const matchRegra = regraLinha.includes(regraValor);
+
+                        if (matchStatus && matchRegra) {
+                            linha.style.display = ''; 
+                        } else {
+                            linha.style.display = 'none'; 
+                        }
+                    });
+                }
+                filtroStatus.addEventListener('change', aplicarFiltros);
+                filtroRegra.addEventListener('input', aplicarFiltros);
+
+                filtroForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                });
+
+                // --- 2. FUNCIONALIDADE DE DETALHES (Sem alteração) ---
+                tabelaIncidentes.addEventListener('click', function(e) {
+                    if (e.target.closest('.details')) { 
+                        const linha = e.target.closest('tr');
+                        const incidenteID = linha.dataset.regra; 
+                        const urlDestino = `detalhesadm.html?id=${incidenteID}`;
+                        window.location.href = urlDestino;
+                    }
+                });
+
+                function exportTableToCSV() {
+                    const csvRows = [];
+                    const headers = ['Regra', 'Status', 'Prioridade', 'Ocorrência', 'Plantonista'];
+                    csvRows.push(headers.join(','));
+
+                    tabelaIncidentes.querySelectorAll("tr").forEach(row => {
+                        if (row.style.display !== 'none') {
+                            const rowData = [];
+                            const cells = row.querySelectorAll('td');
+                            
+                            if (cells.length > 0) {
+                                rowData.push(`"${cells[0].innerText}"`);
+                                rowData.push(`"${cells[1].innerText}"`); 
+                                rowData.push(`"${cells[2].innerText}"`); 
+                                rowData.push(`"${cells[3].innerText}"`); 
+                                rowData.push(`"${cells[4].innerText}"`); 
+                                
+                                csvRows.push(rowData.join(','));
+                            }
+                        }
+                    });
+                    const csvString = csvRows.join('\n');
+              
+                    const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'relatorio_incidentes.csv');
+                    link.style.visibility = 'hidden';
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', exportTableToCSV);
+                }
+                
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const currentPage = window.location.pathname.split('/').pop();
+
+            const menuLinks = document.querySelectorAll('.menu-list a');
+
+            const pageFile = (currentPage === 'pag_adm.html' || currentPage === '') ? 'Inicio' : '';
+
+            menuLinks.forEach(link => {
+                const linkPage = link.getAttribute('href').split('/').pop();
+                
+        
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                }
+            
+                if (pageFile === 'Inicio' && (link.innerText === 'Inicio')) {
+                     link.classList.add('active');
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+  
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (hamburgerBtn && sidebar && overlay) {
+              
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+
+                hamburgerBtn.addEventListener('click', toggleMenu);
+    
+            
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>

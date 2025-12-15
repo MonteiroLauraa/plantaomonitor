@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Rota - Plantão Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adm.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+        
+         <nav>
+            <ul class="menu-list">
+                 <li><a href="operador.html" class="menu-link">Inicio</a></li>
+                <li><a href="pagina_destino.html" class="menu-link">Incidentes</a></li>
+                <li><a href="escalas.html" class="menu-link">Escalas</a></li>
+                <li><a href="preferenciasoperador.html" class="menu-link">Notificações</a></li>
+                <li><a href="opedit.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="oplog.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+            </div>
+            <div class="topbar-user">
+                <span>operador@gmail.com</span>
+            </div>
+        </header>
+</head>
+<body>
+    <nav>
+        </nav>
+
+    <main>
+        
+        <h1>Escala</h1>
+
+        <h2>Escala Atual</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Início</th>
+                    <th>Fim </th>
+                    <th>Canal </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Laura Assis</td>
+                    <td>22/10/2025 08:00</td>
+                    <td>22/10/2025 18:00</td>
+                    <td>CANAIS_DIGITAIS</td>
+                   
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <td>Laura Assis</td>
+                    <td>23/10/2025 08:00</td>
+                    <td>23/10/2025 18:00</td>
+                    <td>CANAIS_DIGITAIS</td>
+                   
+                </tr>
+            </tbody>
+        </table>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>

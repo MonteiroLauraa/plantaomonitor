@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Incidentes - Plantão Monitor</title>
+    <link rel="stylesheet" href="white.css">
+    
+    <style>
+        .status-open {
+            color: var(--cor-perigo, #dc3545);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-ack {
+            color: var(--cor-aviso, #ffc107);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-closed {
+            color: var(--cor-neutra, #6c757d);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        button.details {
+            background-color: var(--cor-neutra, #6c757d);
+        }
+    </style>
+    <div>
+        
+        <h1>Bem-vindo, Visitante!</h1>
+        <p>Você está navegando no modo visitante.</p>
+    </div>
+</head>
+<body>
+    <nav>
+        <img src="logo.png" alt="Logo da Empresa" class="logo">
+           <a href="pagina_visitante.html" class="menu-link">Início</a>
+           <a href="pagteste.html" class="menu-link">escalas</a>
+              <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </nav>
+ 
+
+    <main>
+        <alert>Bem vindo operador!</alert>
+        <h1>Painel de Incidentes em Tempo Real</h1>
+
+        <section class="metricas">
+            <h2>Métricas Principais</h2>
+            <div>Incidentes Criados: <span>5</span></div>
+            <div>Tempo Médio de ACK: <span>5m 12s</span></div>
+            <div>Tempo Médio de Resolução: <span>30m 45s</span></div>
+        </section>
+
+        <section class="filtros">
+            <h3>Filtros</h3>
+            <form id="filtro-form">
+                <label for="status">Status:</label>
+                <select id="filtro-status" name="status">
+                    <option value="todos" selected>Todos</option> 
+                    <option value="open">OPEN</option>
+                    <option value="ack">ACK</option>
+                    <option value="closed">CLOSED</option>
+                </select>
+                <label for="regra">Regra:</label>
+                <input type="text" id="filtro-regra" name="regra" placeholder="Digite o nome da regra...">
+                
+                <button type="submit" disabled>Filtrar</button>
+            </form>
+        </section>
+
+        <section class="feed-incidentes">
+            <h2>Feed de Incidentes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Regra</th>
+                        <th>Status</th>
+                        <th>Prioridade</th>
+                        <th>Ocorrência</th>
+                        <th>Plantonista</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-incidentes">
+                    <tr data-status="open" data-regra="REGRA_001_FALHA_LOGIN" data-detalhes="Falha crítica no login do módulo de pagamentos. Usuários não conseguem acessar.">
+                        <td>REGRA_001_FALHA_LOGIN</td>
+                        <td class="status-open">OPEN</td>
+                        <td>Alta</td>
+                        <td>2025-10-26 10:30:00</td>
+                        <td>N/A</td>
+                        <td>
+                           
+                            <button class="details">Detalhes</button>
+                        </td>
+                    </tr>
+                    <tr data-status="ack" data-regra="REGRA_002_TIMEOUT_API" data-detalhes="API de consulta de CEP com latência acima de 5000ms.">
+                        <td>REGRA_002_TIMEOUT_API</td>
+                        <td class="status-ack">ACK</td>
+                        <td>Média</td>
+                        <td>2025-10-26 10:25:00</td>
+                        <td>operador2</td>
+                        <td>
+                            
+                            <button class="details">Detalhes</button>
+                        </td>
+                    </tr>
+                    <tr data-status="closed" data-regra="REGRA_003_DISK_SPACE" data-detalhes="Servidor DB-01 atingiu 80% de uso de disco. Resolvido com limpeza de logs.">
+                        <td>REGRA_003_DISK_SPACE</td>
+                        <td class="status-closed">CLOSED</td>
+                        <td>Baixa</td>
+                        <td>2025-10-26 09:15:00</td>
+                        <td>operador3</td>
+                        <td>
+                            
+                            <button class="details">Detalhes</button>
+                        </td>
+                    </tr>
+                    <tr data-status="open" data-regra="REGRA_004_ERRO_PLPGSQL" data-detalhes="Procedure 'processar_pagamento' falhando com 'division by zero'.">
+                        <td>REGRA_004_ERRO_PLPGSQL</td>
+                        <td class="status-open">OPEN</td>
+                        <td>Alta</td>
+                        <td>2025-10-26 10:32:00</td>
+                        <td>N/A</td>
+                        <td>
+                        
+                            <button class="details">Detalhes</button>
+                        </td>
+                    </tr>
+                     <tr data-status="closed" data-regra="REGRA_002_TIMEOUT_API" data-detalhes="API de CEP normalizada. Latência voltou para 200ms.">
+                        <td>REGRA_002_TIMEOUT_API</td>
+                        <td class="status-closed">CLOSED</td>
+                        <td>Média</td>
+                        <td>2025-10-26 08:30:00</td>
+                        <td>operador4</td>
+                        <td>
+                  
+                            <button class="details">Detalhes</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+    
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const filtroForm = document.getElementById('filtro-form');
+            const filtroStatus = document.getElementById('filtro-status');
+            const filtroRegra = document.getElementById('filtro-regra');
+            const tabelaIncidentes = document.getElementById('tabela-incidentes');
+            const todasAsLinhas = tabelaIncidentes.querySelectorAll('tr');
+            function aplicarFiltros() {
+                const statusValor = filtroStatus.value.toLowerCase();
+                const regraValor = filtroRegra.value.toLowerCase();
+
+                todasAsLinhas.forEach(function(linha) {
+                    const statusLinha = linha.dataset.status.toLowerCase();
+                    const regraLinha = linha.dataset.regra.toLowerCase();
+
+                    const matchStatus = (statusValor === 'todos' || statusLinha === statusValor);
+                    const matchRegra = regraLinha.includes(regraValor);
+
+               
+                    if (matchStatus && matchRegra) {
+                        linha.style.display = ''; 
+                    } else {
+                        linha.style.display = 'none';
+                    }
+                });
+            }
+
+            filtroStatus.addEventListener('change', aplicarFiltros);
+            filtroRegra.addEventListener('input', aplicarFiltros);
+
+            filtroForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+
+            tabelaIncidentes.addEventListener('click', function(e) {
+                
+                if (e.target.classList.contains('details')) {
+                    
+
+                    const linha = e.target.closest('tr');
+                    
+                    const regra = linha.dataset.regra;
+                    const status = linha.dataset.status.toUpperCase();
+                    const detalhes = linha.dataset.detalhes;
+                    
+                    const mensagem = `
+                        DETALHES DO INCIDENTE
+                        ---------------------------------
+                        Regra: ${regra}
+                        Status: ${status}
+                        ---------------------------------
+                        Descrição:
+                        ${detalhes}
+                    `;
+                    
+                    alert(mensagem);
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

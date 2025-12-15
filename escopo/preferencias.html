@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Preferências - Plantão Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="adm.css">
+</head>
+<body>
+    
+    <aside class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="logo.png" alt="Logo da Empresa">
+        </div>
+ <nav>
+            <ul class="menu-list">
+                 <li><a href="pag_adm.html" class="menu-link">Inicio</a></li>
+                <li><a href="adm.html" class="menu-link">Gestão de Usuários</a></li>
+                <li><a href="teste.html" class="menu-link">Gestão de Regras</a></li>
+                <li><a href="dashboard_incidentes.html" class="menu-link">Incidentes</a></li>
+                <li><a href="gestao_rota.html" class="menu-link">Gestão de Rota (On-call)</a></li>
+                <li><a href="preferencias.html" class="menu-link">Notificações</a></li>
+                <li><a href="editar_perfil.html" class="menu-link">Editar Perfil</a></li>
+                <li><a href="log_notificacoes.html" class="menu-link">Log e Auditoria</a></li>
+            </ul>
+        </nav>
+          <div class="sidebar-footer">
+        <a href="autenticacao.html" class="menu-link">
+            Sair 
+        </a>
+    </div>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+             <button id="hamburger-btn" aria-label="Abrir menu">☰</button>
+            <div class="topbar-title">
+            
+            </div>
+            <div class="topbar-user">
+                <span>adm@gmail.com</span>
+            </div>
+        </header>
+</head>
+<body>
+    <nav>
+        </nav>
+
+    <main>
+        
+      <h1>Minhas Preferências de Notificação </h1>
+        
+        <form>
+            <fieldset>
+                <legend>Notificações por email</legend>
+                <label>
+                    <input type="checkbox" id="enable_email" name="enable_email">
+                    Habilitar notificações por email
+                </label>
+                <br>
+                <label for="email_sound">Som da Notificação por email:</label>
+                <input type="text" id="email_sound" name="email_sound" value="default"> 
+            </fieldset>
+            <fieldset>
+                <legend>Notificações pelo ComuniQ</legend>
+                <label>
+                    <input type="checkbox" id="enable_comuniq" name="enable_comuniq">
+                    Habilitar notificações pelo ComuniQ
+                </label>
+                <br>
+                <label for="comuniq_sound">Som da Notificação pelo ComuniQ:</label>
+                <input type="text" id="comuniq_sound" name="comuniq_sound" value="default"> 
+            </fieldset>
+
+            <fieldset>
+                <legend>Janela de Não-Perturbe </legend>
+                <p>Não enviar notificações entre:</p>
+                <label for="start_time">Hora de Início:</label>
+                <input type="time" id="start_time" name="start_time"> 
+                
+                <label for="end_time">Hora de Fim:</label>
+                <input type="time" id="end_time" name="end_time"> 
+            </fieldset>
+            
+            <button type="submit">Salvar Preferências</button>
+        </form>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+    
+        
+            if (hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('sidebar-visible');
+                    overlay.classList.toggle('visible');
+                }
+    
+                hamburgerBtn.addEventListener('click', toggleMenu);
+
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
+    <div id="sidebar-overlay"></div>
+</body>
+</html>
