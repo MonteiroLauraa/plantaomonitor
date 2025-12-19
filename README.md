@@ -20,6 +20,9 @@ O sistema opera em uma arquitetura híbrida para maximizar performance e confiab
 * **Database (PostgreSQL):** Armazena regras, usuários, logs de auditoria e estados dos incidentes.
 * **Frontend (React):** Dashboards interativos para Operadores e Administradores.
 
+* <img width="5325" height="2940" alt="Firebase Cloud Architecture-2025-12-19-134344" src="https://github.com/user-attachments/assets/da97faa5-4dea-4723-b2d3-68f56fc77fdb" />
+
+
 ## ⚙️ Funcionalidades Principais
 
 ### 1. Monitoramento Inteligente (Runner Python)
