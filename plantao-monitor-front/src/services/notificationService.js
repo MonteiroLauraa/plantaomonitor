@@ -1,6 +1,6 @@
 import { getToken } from "firebase/messaging";
 import { messaging } from "../firebaseConfig";
-import api from "./api"; // Use o api.js que criamos
+import api from "./api";
 
 export const iniciarNotificacoes = async () => {
     try {
@@ -9,7 +9,7 @@ export const iniciarNotificacoes = async () => {
         if (permission === "granted") {
             console.log("Permissão de notificação: granted");
 
-            // Validar Service Worker
+
             const registration = await navigator.serviceWorker.ready;
             if (!registration) {
                 console.error("Service Worker não está pronto.");

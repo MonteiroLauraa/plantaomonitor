@@ -73,10 +73,10 @@ def send_push_notification(tokens, title, body, data_payload=None):
         logging.error(f"Erro ao enviar Push: {e}")
 
 def create_incident(cur, regra, linhas_afetadas):
-    logging.warning(f"Regra '{regra['nome']}' acionada! Linhas: {linhas_afetadas}")
+    logging.warning(f"Regra '{regra['nome']}' acionada linhas: {linhas_afetadas}")
     cur.execute("SELECT id_incidente FROM incidentes WHERE id_regra = %s AND status IN ('OPEN', 'ACK')", (regra['id'],))
     existing = cur.fetchone()
-    
+
     if existing:
      
         logging.info(f"Recorrência: Incidente {existing['id_incidente']} atualizado.")
@@ -151,11 +151,6 @@ def create_incident(cur, regra, linhas_afetadas):
 
 
 def buscar_destinatario_ativo(cursor, canal_regra):
-    """
-    Busca quem é o plantonista ATUAL para o canal da regra (ex: 'DBA').
-    Recebe 'cursor' já aberto.
-    Retorna dict com: id, email, nome, recebe_email (bool), recebe_push (bool)
-    """
     canal_alvo = canal_regra if canal_regra else 'GERAL'
     print(f"   [Router] Procurando plantonista para '{canal_alvo}'...")
     query = """
@@ -182,7 +177,7 @@ def buscar_destinatario_ativo(cursor, canal_regra):
         print(f"   Plantonista: {plantonista['nome']} | Email={plantonista['recebe_email']}, Push={plantonista['recebe_push']}")
         return plantonista
     
-    print(f"   Ninguém de plantão para '{canal_alvo}'. Procurando Admin (Fallback).")
+    print(f"   Ninguém de plantão para '{canal_alvo}'. Procurando admin .")
     
     cursor.execute("""
         SELECT id, email, nome, 
@@ -207,7 +202,6 @@ def atualizar_heartbeat(conn):
         print(f"Erro Heartbeat: {e}")
 
 def job_escalonamento():
-    print("\n[Escalonamento] Verificando incidentes ignorados...")
     conn = get_db_connection()
     if not conn: return
     
@@ -220,19 +214,19 @@ def job_escalonamento():
             JOIN regras r ON i.id_regra = r.id
             WHERE i.status = 'OPEN' 
               AND i.data_abertura < NOW() - INTERVAL '2 HOURS'
-              AND i.prioridade < 1 -- Evita escalar o que já é critico
+              AND i.prioridade < 1
         """
         cursor.execute(query)
         atrasados = cursor.fetchall()
         
         for inc in atrasados:
-            print(f"   ESCALANDO Incidente #{inc['id_incidente']} (Sem ACK há 2h)")
+            print(f"   ESCALANDO Incidente #{inc['id_incidente']}")
             
             cursor.execute("UPDATE incidentes SET prioridade = 1 WHERE id_incidente = %s", (inc['id_incidente'],))
             
             cursor.execute("""
                 INSERT INTO notificacoes (id_incidente, canal, destinatario, mensagem, status, titulo, metadados)
-                VALUES (%s, 'EMAIL', 'admin@empresa.com', 'ESCALATION: Operador não respondeu em 2h!', 'PENDING', '🔥 ESCALATION ALERT', %s)
+                VALUES (%s, 'EMAIL', 'admin@empresa.com', 'ESCALATION: Operador não respondeu em 2h!', 'PENDING', 'ESCALATION ALERT', %s)
             """, (inc['id_incidente'], json.dumps({"rota": f"/admin/incidentes/{inc['id_incidente']}", "prioridade": "critica"})))
             
         conn.commit()
@@ -282,7 +276,6 @@ def processar_notificacoes(conn):
 
 
 def get_tokens_for_notification(regra):
-    """ Returns unique FCM tokens for: Admins + Owner """
     conn = get_db_connection()
     cur = conn.cursor()
     owner_id = regra.get('usuario_id')
@@ -294,17 +287,14 @@ def get_tokens_for_notification(regra):
     return tokens
 
 def get_emails_for_notification(regra):
-    """ Returns unique Emails for: Admins + Owner + Specific Email """
     conn = get_db_connection()
     cur = conn.cursor()
     owner_id = regra.get('usuario_id')
     query = "SELECT DISTINCT u.email FROM usuarios u WHERE (u.role = 'admin' OR u.id = %s) AND u.enable_email = true"
     cur.execute(query, (owner_id,))
     emails = [r['email'] for r in cur.fetchall()]
-    
     specific = regra.get('email_notificacao')
     if specific and specific not in emails: emails.append(specific)
-    
     cur.close()
     conn.close()
     return emails
@@ -441,7 +431,7 @@ def job_verificar_acks_escalas():
             FROM escalas e
             JOIN usuarios u ON e.id_usuario = u.id
             WHERE (e.status_confirmacao = 'PENDING' OR e.status_confirmacao IS NULL)
-              AND e.data_inicio BETWEEN NOW() AND (NOW() + INTERVAL '2 HOURS')
+              AND e.data_inicio BETWEEN NOW() AND (NOW() + INTERVAL '5 MINUTES')
         """
         cursor.execute(query_criticos)
         escalas_sem_ack = cursor.fetchall()
@@ -520,7 +510,7 @@ schedule.every(15).seconds.do(job_notificacoes)
 schedule.every(5).minutes.do(job_escalonamento)
 
 if __name__ == "__main__":
-    print("RUNNER V3: Monitoramento + On-Call Ativo...")
+    print("Runner rodandoo")
     while True:
         schedule.run_pending()
         time.sleep(1)

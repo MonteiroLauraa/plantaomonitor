@@ -7,7 +7,7 @@ const admin = require("firebase-admin");
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err);
 });
-process.on('unhandledRejection', (reason, p) => {
+process.on('unhandledRejection', (reason) => {
   console.error('UNHANDLED REJECTION:', reason);
 });
 
@@ -18,7 +18,7 @@ app.use(cors());
 const PORT = 8000;
 const DATABASE_URL = process.env.DATABASE_URL;
 
-console.log("INICIANDO API (Produção)...");
+console.log("INICIANDO API...");
 
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -74,6 +74,7 @@ app.get('/notificacoes/pendentes', async (req, res) => {
   const client = await pool.connect();
   try {
     const q = `
+
             SELECT n.*, r.nome as nome_regra
             FROM notificacoes n
             JOIN usuarios u ON n.id_usuario = u.id 
@@ -284,8 +285,11 @@ app.post('/db-test', async (req, res) => {
     else if (['DELETE', 'DROP', 'TRUNCATE', 'ALTER'].includes(comando)) {
       permissaoNecessaria = 'SQL_DELETE';
     }
-    else if (['INSERT', 'UPDATE'].includes(comando)) {
-      permissaoNecessaria = 'SQL_DELETE';
+    else if (['INSERT'].includes(comando)) {
+      permissaoNecessaria = 'SQL_INSERT';
+    }
+    else if (['UPDATE'].includes(comando)) {
+      permissaoNecessaria = 'SQL_UPDATE';
     }
     else {
       permissaoNecessaria = 'SQL_DELETE';
@@ -355,7 +359,7 @@ app.post("/notify/push", async (req, res) => {
     }
 
     else if (target_role === 'admin') {
-      console.log(`[Push] Broadcast para ADMINS`);
+      console.log(` Broadcast para ADMINS`);
       q = `
             SELECT d.push_token, u.nome, u.recebe_push
             FROM dispositivos_usuarios d
@@ -528,7 +532,6 @@ app.delete('/usuarios/:id', async (req, res) => {
     await client.query("DELETE FROM escalas WHERE id_usuario = $1", [uid]);
     await client.query("DELETE FROM permissoes_usuarios WHERE usuario_id = $1", [uid]);
     await client.query("DELETE FROM usuarios WHERE id = $1", [uid]);
-
     await logAudit(client, 'Admin', 'DELETE_USER', `ID ${uid}`, 'Usuário excluído com dependências');
     res.json({ message: "Usuário e dados vinculados removidos com sucesso." });
   } catch (e) {

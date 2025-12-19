@@ -48,7 +48,7 @@ def calcular_metricas():
      
         metrics_exec = df_exec.groupby('id_regra').agg(
             total_execucoes=('id_regra', 'count'),
-            total_erros=('sucesso', lambda x: (~x).sum())
+            total_erros=('sucesso', lambda x: (~x).sum()),
             tempo_medio_execucao_ms=('duracao_ms', 'mean')
         ).reset_index()
 
